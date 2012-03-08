@@ -1,18 +1,7 @@
 ﻿var rssURL = "http://15thdoverscouts.org.uk/news.rss";
 var db;
-var phoneGapAvailable = false;
-// PhoneGap has 1 second to get started otherwise we'll go without it
-var t = setTimeout("if (!phoneGapAvailable) onDeviceReady();", 1000);
 
 function onLoad() {
-    document.addEventListener("deviceready", onPhoneGapReady, false);
-}
-
-function onPhoneGapReady() {
-    phoneGapAvailable = true;
-    onDeviceReady();
-}
-function onDeviceReady() {
     db = window.openDatabase("newsDB", "1.0", "News Database", 256*1024);
     createDatabase();
     loadItems();

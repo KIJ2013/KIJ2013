@@ -2,6 +2,11 @@
 var db;
 
 function onLoad() {
+    if(!window.openDatabase)
+    {
+        $('#news-list').html('<p>Sorry Support for your device is not ready yet. Please try again in the future.</p>');
+        return;
+    }
     db = window.openDatabase("newsDB", "1.0", "News Database", 256*1024);
     createDatabase();
     loadItems();
@@ -42,16 +47,16 @@ function loadItems()
 */
 function fetchItems()
 {
-  $.get(rssURL, function(data){
-      db.transaction(function(tx){
-          $(data).find('item').each(function(i,item){
-              var guid = $(item).find('guid').text();
-              var title = $(item).find('title').text();
-              var date = new Date($(item).find('pubDate').text());
-              var description = $(item).find('description').text();
-              tx.executeSql('INSERT INTO `items` (`guid`, `title`, `date`, `description`) VALUES (?, ?, ?, ?)', [guid, title, (date/1000), description]);
-          });
-      });
+    $.get(rssURL, function(data){
+        db.transaction(function(tx){
+            $(data).find('item').each(function(i,item){
+                var guid = $(item).find('guid').text();
+                var title = $(item).find('title').text();
+                var date = new Date($(item).find('pubDate').text());
+                var description = $(item).find('description').text();
+                tx.executeSql('INSERT INTO `items` (`guid`, `title`, `date`, `description`) VALUES (?, ?, ?, ?)', [guid, title, (date/1000), description]);
+            });
+        });
       loadItems();
-  },"xml");
+    },"xml").error(function(jqXHR,status,error){alert('Error Fetching Items: '+status);});
 }

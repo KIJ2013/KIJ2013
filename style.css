@@ -1,100 +1,107 @@
 html, body 
 {
-	min-height: 100%;
-	position: relative;
-	margin: 0 auto;
-	height: auto !important;
-	height: 100%;
+    min-height: 100%;
+    position: relative;
+    margin: 0 auto;
+    height: auto !important;
+    height: 100%;
 }
 body 
 {
-	background-color: #ffcc33;
-	/*background-image: url(bg_flick.png);*/
-	background-repeat: no-repeat;
-	background-position: 100% 100%;
-	
-	font-family: sans-serif;
+    background-color: #ffcc33;
+    /*background-image: url(bg_flick.png);*/
+    background-repeat: no-repeat;
+    background-position: 100% 100%;
+    font-family: sans-serif;
 }
 
 ul {
-	list-style: none;
-	padding: 0;
-	margin: 10px;
-	text-align: center;
-	font-size: 2.5em;
-	font-weight: bold;
-	text-shadow: 0 1px 1px #EEE;
+    list-style: none;
+    padding: 0;
+    margin: 10px;
+    font-size: 2.5em;
+    font-weight: bold;
+    text-shadow: 0 1px 1px #EEE;
 }
 ul.listview li {
-	font-size: 12pt;
-	font-weight: normal;
-	border-bottom: 1px solid #333;
-	text-align: left;
+    font-size: 12pt;
+    font-weight: normal;
+    border-bottom: 1px solid #333;
+    text-align: left;
 }
 
 ul.gridview li
 {
-	display: inline-block;
-	text-align: center;
-	width: 48%;
+    display: inline-block;
+    text-align: center;
+    width: 140px;
 }
 
 ul li a
 {
-	color: black;
-	font-weight: bold;
-	text-decoration: none;
-	display: block;
-	font-size: 32px;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
+    font-size: 32px;
 }
 ul.listview li a
 {
-	height: 48px;
-	line-height: 48px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+    height: 48px;
+    line-height: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 #body {
-	margin-top: 48px;
+    margin-top: 48px;
 }
 #header_image {
-	background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/02/kij2009opening.jpg);
-	background-repeat: no-repeat;
-	background-position: 0 50%;
-	height: 72px;
-	/*-webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(50%, transparent), to(white));*/
+    background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/02/kij2009opening.jpg);
+    background-repeat: no-repeat;
+    background-position: 0 50%;
+    height: 72px;
+    text-align: center;
+    /*-webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(50%, transparent), to(white));*/
 }
 #action_bar {
-	background-color: #DDD;
-	height: 48px;
-	border-bottom: 1px solid #A9A9A9;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
+    background-color: #DDD;
+    height: 48px;
+    border-bottom: 1px solid #A9A9A9;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 #action_bar a {
-	color: #9A9A9A;
-	text-decoration: none;
-	position: relative;
-	margin-left: 4px;
-	font-size: 28px;
+    color: #9A9A9A;
+    text-decoration: none;
+    position: relative;
+    margin-left: 4px;
+    font-size: 28px;
+    min-width: 64px;
+    display: inline-block;
+    height: 32px;
 }
 #action_bar a div {
-	font-size: 60pt;
-	position: absolute;
-	top: 0;
+    font-size: 60pt;
+    position: absolute;
+    top: 0;
 }
 #action_bar img {
-	display: inline-block;
-	vertical-align: middle;
+    display: inline-block;
+    vertical-align: middle;
 }
 #action_bar h1 {
-	color: #333;
-	display: inline-block;
-	margin: 16px 4px;
-	vertical-align: middle;
-	font-size: 16px;
+    color: #333;
+    display: inline-block;
+    margin: 16px 4px;
+    vertical-align: middle;
+    font-size: 16px;
+}
+#action_bar #appicon {
+    position: absolute;
+    left: 30px;
+    top: 4px;
 }

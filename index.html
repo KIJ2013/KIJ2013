@@ -3,11 +3,23 @@
   <head>
     <title>KIJ 2013</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="shortcut icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png" />
+    <script type="text/javascript">
+        // Hides mobile browser's address bar when page is done loading.
+        window.addEventListener('load', function(e) {
+            setTimeout(function() { window.scrollTo(0, 1); }, 1);
+        }, false);
+    </script>
   </head>
   <body onload="">
     <div id="action_bar">
-        <img src="icon.png" height="32" style="margin-left:44px"/>
+        <a href="index.html">
+            &nbsp;
+            <img id="appicon" src="icon.png" height="32"/>
+        </a>
         <h1>KIJ 2013</h1>
     </div>
     <div id="body">

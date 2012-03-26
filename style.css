@@ -72,6 +72,8 @@ ul.listview li a
     top: 0;
     left: 0;
     right: 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #action_bar a {
@@ -104,4 +106,18 @@ ul.listview li a
     position: absolute;
     left: 30px;
     top: 4px;
+}
+#popup {
+    display: none;
+    background: #EEE;
+    border: solid #CCC;
+    border-width: 1px 1px 0 1px;
+    position: fixed;
+    bottom: 0px;
+    margin: 0 15%;
+    padding: 5px;
+    width: 70%;
+    text-align: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }

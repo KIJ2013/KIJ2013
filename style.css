@@ -49,11 +49,8 @@ ul li a
 ul.listview li a
 {
     color: #111;
-    height: 48px;
-    line-height: 48px;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-shadow: 0 2px 1px #CC9;
     white-space: nowrap;
 }
 #body {
@@ -123,4 +120,55 @@ ul.listview li a
     text-align: center;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+}
+#news-list li {
+    line-height: 48px;
+}
+#event-list li > a {
+    position: relative;
+}
+#event-list p {
+    margin: 0;
+}
+#event-list .title {
+    font-size: 20pt;
+    white-space: normal;
+    width: 70%;
+}
+#event-list .date-text {
+    color: #4C114C;
+    float: left;
+    font-size: 18pt;
+    font-weight: bold;
+    text-align: center;
+    width: 50px;
+    white-space: normal;
+}
+#event-list .remind {
+    background: #4c114c; /* Old browsers */
+    background: -moz-linear-gradient(top,  #4c114c 0%, #210621 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c114c), color-stop(100%,#210621)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #4c114c 0%,#210621 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #4c114c 0%,#210621 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #4c114c 0%,#210621 100%); /* IE10+ */
+    background: linear-gradient(top,  #4c114c 0%,#210621 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c114c', endColorstr='#210621',GradientType=0 ); /* IE6-9 */
+    border-radius: 5px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),0 1px 2px rgba(0, 0, 0, 0.05);
+    color: white;
+    font-size: 10pt;
+    font-weight: normal;
+    padding: 3px;
+    position: absolute;
+    right: 0;
+    top: 10px;
+}
+#event-list .remind:hover {
+    background: #4c114c;
+}
+#event-list .category {
+    bottom: 5px;
+    font-size: 10pt;
+    position: absolute;
+    right: 5px;
 }

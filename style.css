@@ -1,10 +1,7 @@
 html, body 
 {
-    min-height: 100%;
-    position: relative;
     margin: 0 auto;
-    height: auto !important;
-    height: 100%;
+    position: relative;
 }
 body 
 {
@@ -13,6 +10,7 @@ body
     background-repeat: no-repeat;
     background-position: 100% 100%;
     font-family: sans-serif;
+    min-height: 480px;
 }
 
 ul {
@@ -21,36 +19,41 @@ ul {
     margin: 10px;
     font-size: 2.5em;
     font-weight: bold;
-    text-shadow: 0 1px 1px #EEE;
+}
+ul.listview {
+    margin: 0;
 }
 ul.listview li {
+    border-bottom: 1px solid #333;
     font-size: 12pt;
     font-weight: normal;
-    border-bottom: 1px solid #333;
+    padding: 0 10px;
     text-align: left;
 }
-
 ul.gridview li
 {
     display: inline-block;
     text-align: center;
-    width: 140px;
+    width: 135px;
 }
 
 ul li a
 {
     color: black;
-    font-weight: bold;
-    text-decoration: none;
+    cursor: pointer;
     display: block;
     font-size: 32px;
+    font-weight: bold;
+    text-decoration: none;
 }
 ul.listview li a
 {
+    color: #111;
     height: 48px;
     line-height: 48px;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 2px 1px #CC9;
     white-space: nowrap;
 }
 #body {

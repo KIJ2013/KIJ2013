@@ -1,4 +1,5 @@
-﻿var rssURL = "http://15thdoverscouts.org.uk/news.rss";
+﻿//var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
+var rssURL = "news.rss";
 var db;
 var activity = 'list';
 
@@ -12,6 +13,8 @@ function onLoad() {
     createDatabase();
     loadItems();
     fetchItems();
+    // Hides mobile browser's address bar when page is done loading.
+    setTimeout(function() { window.scrollTo(0, 1); }, 1);
 }
 
 function createDatabase() {
@@ -19,7 +22,7 @@ function createDatabase() {
         tx.executeSql('CREATE TABLE IF NOT EXISTS `items` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255), `date` int, `description` text)');
     });
 }
-  
+
 /**
 * Load items from database
 */
@@ -36,8 +39,8 @@ function loadItems()
             for(var i=0;i<len;i++)
             {
                 var row = result.rows.item(i);
-                var li = $('<li></li>');
-                var item = $('<a href="#" id="'+row.guid+'">'+row.title+'</a>');
+                var li = $('<li />');
+                var item = $('<a />').attr('id', row.guid).text(row.title);
                 item.data('guid', row.guid);
                 item.click(onClickNewsItem);
                 li.append(item);
@@ -62,12 +65,15 @@ function fetchItems()
                 var guid = $(item).find('guid').text();
                 var title = $(item).find('title').text();
                 var date = new Date($(item).find('pubDate').text());
-                var description = $(item).find('description').text();
+                var description = $(item).find('encoded').text();
+                description = description || $(item).find('description').text();
                 tx.executeSql('INSERT INTO `items` (`guid`, `title`, `date`, `description`) VALUES (?, ?, ?, ?)', [guid, title, (date/1000), description]);
             });
         });
       loadItems();
-    },"xml").error(function(jqXHR,status,error){showError('Error Fetching Items: '+status);});
+    },"xml").error(function(jqXHR,status,error){
+        showError('Error Fetching Items: '+status);
+    });
 }
 
 function onClickNewsItem(event)
@@ -98,6 +104,7 @@ function displayNewsItem(guid){
                 content.append('<h1>'+item.title+'</h1>');
                 content.append(item.description);
                 $('#body').append(content);
+                window.scrollTo(0, 1);
             }
         });
     });

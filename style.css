@@ -10,7 +10,7 @@ body
     background-repeat: no-repeat;
     background-position: 100% 100%;
     font-family: sans-serif;
-    min-height: 480px;
+    min-height: 570px;
 }
 
 ul {
@@ -74,26 +74,24 @@ ul.listview li a
     right: 0;
     overflow: hidden;
     white-space: nowrap;
+    z-index: 1;
 }
 
 #action_bar a {
     color: #9A9A9A;
-    text-decoration: none;
-    position: relative;
-    margin-left: 4px;
-    font-size: 28px;
-    min-width: 64px;
+    cursor: pointer;
     display: inline-block;
+    font-size: 28px;
     height: 32px;
-}
-#action_bar a div {
-    font-size: 60pt;
-    position: absolute;
-    top: 0;
+    line-height: 20px;
+    margin-left: 4px;
+    min-width: 64px;
+    text-decoration: none;
 }
 #action_bar img {
     display: inline-block;
     vertical-align: middle;
+    width: 32px;
 }
 #action_bar h1 {
     color: #333;
@@ -102,10 +100,10 @@ ul.listview li a
     vertical-align: middle;
     font-size: 16px;
 }
-#action_bar #appicon {
-    position: absolute;
-    left: 30px;
-    top: 4px;
+#loading {
+    font-size: 2em;
+    padding: 20px;
+    text-align: center;
 }
 #popup {
     display: none;

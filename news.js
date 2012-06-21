@@ -1,4 +1,4 @@
-﻿KIJ2013.NewsPage = function(){
+KIJ2013.News = function(){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "news.rss";
     var TABLE_NAME = 'news';
@@ -27,7 +27,7 @@
             });
             displayNewsList();
         },"xml").error(function(jqXHR,status,error){
-            showError('Error Fetching Items: '+status);
+            KIJ2013.showError('Error Fetching Items: '+status);
         });
     }
 
@@ -60,7 +60,7 @@
                     $('#body').empty().append(list);
                 }
                 else
-                    $('#body').append('<div>Loading News</div>');
+                    KIJ2013.showLoading();
             });
         });
     }
@@ -68,7 +68,7 @@
     var displayNewsItem = function(guid){
         KIJ2013.setActionBarUp(displayNewsList);
         KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME + '` WHERE guid = ? LIMIT 30', [guid], function(tx, result){
+            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME + '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
                 if(result.rows.length == 1)
                 {
                     var item = result.rows.item(0);
@@ -97,3 +97,4 @@
         }
     }
 }();
+$(KIJ2013.News.init);

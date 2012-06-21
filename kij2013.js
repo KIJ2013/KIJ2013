@@ -31,6 +31,13 @@ var KIJ2013 = function(){
         {
             $('#action_bar h1').text(title);
         },
+        showLoading: function()
+        {
+            $('<div/>').attr('id', "loading")
+            .text("Loading").append(
+                $('<img/>').attr('src',"ajax-loader.gif")
+            ).appendTo('#body');
+        },
         showError: function(message)
         {
             $('#popup').text(message);

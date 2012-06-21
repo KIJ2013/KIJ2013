@@ -1,10 +1,10 @@
-KIJ2013.EventsPage = function(){
+KIJ2013.Events = function(){
 
     /**
      * PRIVATE Variables
      */
-    ﻿//var iCalURL = "http://www.kij13.org.uk/category/latest-news/feed/";
-    var iCalURL = "events.ical";
+    //var rssURL = "http://www.kij13.org.uk/category/events/feed/";
+    var jsonURL = "events.json";
     var TABLE_NAME = "events";
 
     /**
@@ -21,6 +21,22 @@ KIJ2013.EventsPage = function(){
     */
     var fetchItems = function()
     {
+        $.get(jsonURL, function(data){
+            KIJ2013.db.transaction(function(tx){
+                $(data).each(function(i,item){
+                    var guid = item.guid;
+                    var title = item.title;
+                    var date = new Date(item.date*1000);
+                    var category = item.category;
+                    var remind = !!item.remind;
+                    var description = item.description;
+                    tx.executeSql('INSERT INTO `' + TABLE_NAME + '` (`guid`, `title`, `date`, `category`, `remind`, `description`) VALUES (?, ?, ?, ?, ?, ?)', [guid, title, (date/1000), category, remind, description]);
+                });
+            });
+            displayEventsList();
+        },"json").error(function(jqXHR,status,error){
+            KIJ2013.showError('Error Fetching Events: '+status);
+        });
     }
 
     var onClickEventItem = function(event)
@@ -70,7 +86,7 @@ KIJ2013.EventsPage = function(){
                     $('#body').empty().append(list);
                 }
                 else
-                    $('<div/>').attr('id',"loading").text("Loading Events").appendTo('#body');
+                    KIJ2013.showLoading();
             });
         });
     }
@@ -105,4 +121,4 @@ KIJ2013.EventsPage = function(){
         }
     }
 }();
-$(KIJ2013.EventsPage.init);
+$(KIJ2013.Events.init);

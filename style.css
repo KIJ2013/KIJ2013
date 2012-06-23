@@ -18,7 +18,6 @@ ul {
     padding: 0;
     margin: 10px;
     font-size: 2.5em;
-    font-weight: bold;
 }
 ul.listview {
     margin: 0;
@@ -43,7 +42,6 @@ ul li a
     cursor: pointer;
     display: block;
     font-size: 32px;
-    font-weight: bold;
     text-decoration: none;
 }
 ul.listview li a
@@ -130,43 +128,70 @@ ul.listview li a
 }
 #event-list .title {
     font-size: 20pt;
+    font-weight: bold;
     white-space: normal;
     width: 70%;
 }
 #event-list .date-text {
-    color: #4C114C;
     float: left;
-    font-size: 18pt;
-    font-weight: bold;
     text-align: center;
     width: 50px;
     white-space: normal;
 }
-#event-list .remind {
-    background: #4c114c; /* Old browsers */
-    background: -moz-linear-gradient(top,  #4c114c 0%, #210621 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c114c), color-stop(100%,#210621)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #4c114c 0%,#210621 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #4c114c 0%,#210621 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #4c114c 0%,#210621 100%); /* IE10+ */
-    background: linear-gradient(top,  #4c114c 0%,#210621 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c114c', endColorstr='#210621',GradientType=0 ); /* IE6-9 */
-    border-radius: 5px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),0 1px 2px rgba(0, 0, 0, 0.05);
+.date-text {
+    color: #4C114C;
+    font-size: 18pt;
+}
+#event-list .remind-btn{
     color: white;
-    font-size: 10pt;
-    font-weight: normal;
-    padding: 3px;
     position: absolute;
     right: 0;
     top: 10px;
 }
-#event-list .remind:hover {
+button,
+ .button {
     background: #4c114c;
+    color: white;
+    cursor: pointer;
+    font-size: 10pt;
+    font-weight: normal;
+    padding: 5px 10px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border: solid 1px #210621;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+    -webkit-transition-duration: 0.2s;
+    -moz-transition-duration: 0.2s;
+    transition-duration: 0.2s;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}
+
+button:hover,
+button:focus,
+.button:hover,
+.button:focus {
+    background: #360B36;
+}
+button:active,
+.button.selected,
+.button:active {
+    -webkit-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+    -moz-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+    background: #360B36;
+}
+.category {
+    font-size: 10pt;
+    font-weight: bold;
 }
 #event-list .category {
     bottom: 5px;
-    font-size: 10pt;
     position: absolute;
     right: 5px;
 }

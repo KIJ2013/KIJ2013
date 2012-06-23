@@ -3,34 +3,34 @@
     "title": "Opening Ceremony",
     "date": "1374926400",
     "category": "all",
-    "remind": "0",
+    "remind": false,
     "description": ""
 },{
     "guid": "2",
     "title": "Campfire",
     "date": "1375038000",
     "category": "subcampa",
-    "remind": "0",
+    "remind": false,
     "description": ""
 },{
     "guid": "3",
     "title": "Water Activities",
     "date": "1375174800",
     "category": "subcampa",
-    "remind": "0",
+    "remind": false,
     "description": ""
 },{
     "guid": "4",
     "title": "JOTA / JOTI",
     "date": "1375347600",
     "category": "all",
-    "remind": "0",
+    "remind": false,
     "description": ""
 },{
     "guid": "5",
     "title": "Closing Ceremony",
     "date": "1375531200",
     "category": "all",
-    "remind": "0",
+    "remind": false,
     "description": ""
 }]

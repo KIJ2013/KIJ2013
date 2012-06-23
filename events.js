@@ -4,48 +4,47 @@ KIJ2013.Events = function(){
      * PRIVATE Variables
      */
     //var rssURL = "http://www.kij13.org.uk/category/events/feed/";
-    var jsonURL = "events.json";
-    var TABLE_NAME = "events";
+    var jsonURL = "events.json",
+        TABLE_NAME = "events",
 
     /**
      * Create Database
      */
-    var createDatabase = function () {
+    createDatabase = function () {
         KIJ2013.db.transaction(function(tx){
-            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME + '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255), `date` int, `category` varchar(255), `remind` bool, `description` text)');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
+            '` (`guid` varchar(255) PRIMARY KEY,`title` varchar(255),' +
+            '`date` int,`category` varchar(255),`remind` bool,`description` text)');
         });
-    }
+    },
 
     /**
     * Fetch new items from web
     */
-    var fetchItems = function()
+    fetchItems = function()
     {
         $.get(jsonURL, function(data){
             KIJ2013.db.transaction(function(tx){
                 $(data).each(function(i,item){
-                    var guid = item.guid;
-                    var title = item.title;
-                    var date = new Date(item.date*1000);
-                    var category = item.category;
-                    var remind = !!item.remind;
-                    var description = item.description;
-                    tx.executeSql('INSERT INTO `' + TABLE_NAME + '` (`guid`, `title`, `date`, `category`, `remind`, `description`) VALUES (?, ?, ?, ?, ?, ?)', [guid, title, (date/1000), category, remind, description]);
+                    tx.executeSql('INSERT INTO `' + TABLE_NAME +
+                        '` (`guid`,`title`,`date`,`category`,`remind`,' +
+                        '`description`) VALUES (?, ?, ?, ?, ?, ?)', [item.guid,
+                        item.title, item.date, item.category, !!item.remind,
+                        item.description]);
                 });
             });
             displayEventsList();
         },"json").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Events: '+status);
         });
-    }
+    },
 
-    var onClickEventItem = function(event)
+    onClickEventItem = function(event)
     {
-        var sender = $(this);
-        displayEvent(sender.data('guid'));
-    }
+        displayEvent($(this).data('guid'));
+    },
 
-    var displayEventsList = function()
+    displayEventsList = function()
     {
         KIJ2013.setActionBarUp('index.html');
         KIJ2013.setActionBarTitle('Events');
@@ -53,31 +52,30 @@ KIJ2013.Events = function(){
             tx.executeSql('SELECT guid,title,date,category,remind FROM `' +
                     TABLE_NAME + '` WHERE `date` > ? ORDER BY `date` ASC LIMIT 30',
                     [(new Date())/1000], function(tx, result){
-                var len = result.rows.length;
+                var len = result.rows.length,
+                    list = $('<ul/>').attr('id', "event-list").addClass("listview"),
+                    month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    i=0;
                 if(len)
                 {
-                    var list = $('<ul/>')
-                        .attr('id', "event-list")
-                        .addClass("listview");
-                    var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    for(var i=0;i<len;i++)
+                    for(;i<len;i++)
                     {
-                        var row = result.rows.item(i);
-                        var li = $('<li/>');
-                        var item = $('<a/>').attr('id', row.guid);
-                        var date = new Date(row.date*1000);
-                        var datetext = $('<p/>')
+                        var row = result.rows.item(i),
+                            li = $('<li/>'),
+                            item = $('<a/>').attr('id', row.guid),
+                            date = new Date(row.date*1000),
+                            datetext = $('<p/>')
                             .addClass('date-text')
-                            .text(date.getDate() + " " + month[date.getMonth()]);
-                        var text = $('<p/>')
+                            .text(date.getDate() + " " + month[date.getMonth()]),
+                            text = $('<p/>')
                             .addClass('title')
-                            .text(row.title);
-                        var remind = $('<a/>')
+                            .text(row.title),
+                            remind = $('<a/>')
                             .addClass('remind-btn button')
                             .addClass(row.remind ? 'selected' : '')
-                            .text('Remind');
-                        var category = $('<p/>')
+                            .text('Remind'),
+                            category = $('<p/>')
                             .addClass('category')
                             .text(row.category);
                         item.data('guid', row.guid);
@@ -92,9 +90,9 @@ KIJ2013.Events = function(){
                     KIJ2013.showLoading();
             });
         });
-    }
+    },
 
-    var displayEvent = function(guid){
+    displayEvent = function(guid){
         KIJ2013.setActionBarUp(displayEventsList);
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT title,date,remind,category,description FROM `' +
@@ -102,11 +100,11 @@ KIJ2013.Events = function(){
                     function(tx, result){
                 if(result.rows.length == 1)
                 {
-                    var item = result.rows.item(0);
+                    var item = result.rows.item(0),
+                        content = $('<div/>').css({"padding": "10px"}),
+                        date = new Date(item.date*1000);
                     KIJ2013.setActionBarTitle(item.title)
                     $('#body').empty();
-                    var content = $('<div/>').css({"padding": "10px"});
-                    var date = new Date(item.date*1000);
                     $('<h1/>').text(item.title).appendTo(content);
                     $('<p/>').addClass("date-text")
                         .text(date.toLocaleString())
@@ -134,7 +132,7 @@ KIJ2013.Events = function(){
                 }
             });
         });
-    }
+    };
 
     return {
         init: function() {

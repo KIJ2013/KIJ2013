@@ -10,21 +10,28 @@ var KIJ2013 = function(){
             }
             this.db = window.openDatabase("KIJ2013", "1.0", "KIJ2013 Database", 256*1024);
         },
+        sql: function(sql, vars, callback){
+            if(typeof callback == "function")
+                this.db.readTransaction(function(tx){
+                    tx.executeSql(sql,vars,callback);
+                });
+            else
+                this.db.transaction(function(tx){
+                    tx.executeSql(sql,vars);
+                });
+        },
         setActionBarUp: function(fn)
         {
             if(typeof fn == "function")
             {
-                $('#up-button').removeAttr('href');
-                $('#up-button').unbind();
-                $('#up-button').click(function(){
+                $('#up-button').removeAttr('href').unbind().click(function(){
                     fn();
                     return false;
                 });
             }
             else if(typeof fn == "string")
             {
-                $('#up-button').unbind();
-                $('#up-button').attr('href', fn);
+                $('#up-button').unbind().attr('href', fn);
             }
         },
         setActionBarTitle: function(title)
@@ -40,10 +47,10 @@ var KIJ2013 = function(){
         },
         showError: function(message)
         {
-            $('#popup').text(message);
-            $('#popup').show();
+            var popup = $('#popup');
+            popup.text(message).show();
             setTimeout(function(){
-                $('#popup').slideUp('normal')
+                popup.slideUp('normal')
             },5000);
         }
     }

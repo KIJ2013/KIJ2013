@@ -3,8 +3,26 @@
     <head>
         <title>KIJ 2013 - Map</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="style.css" />
+        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="leaflet.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <style>
+            html,
+            body {
+                height: 100%;
+                min-height: 0;
+            }
+            #action_bar {
+                position: relative;
+            }
+            #body {
+                margin-top: 0;
+                height: 89%;
+            }
+            #map {
+                height: 100%;
+            }
+        </style>
     </head>
     <body>
         <div id="action_bar">
@@ -14,13 +32,12 @@
             <h1>Map</h1>
         </div>
         <div id="body">
-            <div id="overscroll">
-                <img src="map.png" />
-            </div>
+            <div id="map"></div>
         </div>
         <div id="popup"></div>
-        <script type="text/javascript" charset="utf-8" src="jquery-1.7.1.min.js"></script>
-        <script type="text/javascript" charset="utf-8" src="KIJ2013.js"></script>
-        <script type="text/javascript" charset="utf-8" src="map.js"></script>
+        <script src="jquery-1.7.1.min.js"></script>
+        <script src="leaflet.js"></script>
+        <script src="KIJ2013.js"></script>
+        <script src="map.js"></script>
     </body>
 </html>

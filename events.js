@@ -56,9 +56,11 @@ KIJ2013.Events = function(){
     {
         KIJ2013.setActionBarUp('index.html');
         KIJ2013.setActionBarTitle('Events');
-        KIJ2013.sql('SELECT guid,title,date,category,remind FROM `' +
-                TABLE_NAME + '` WHERE `date` > ? ORDER BY `date` ASC LIMIT 30',
-                [(new Date())/1000], function(tx, result){
+        var subcamp = KIJ2013.getPreference('subcamp');
+        KIJ2013.sql('SELECT guid,title,date,category,remind FROM `' + TABLE_NAME +
+                '` WHERE `date` > ? AND (`category` = ? OR `category` = "all") ' +
+                'ORDER BY `date` ASC LIMIT 30',
+                [(new Date())/1000,subcamp], function(tx, result){
             var len = result.rows.length,
                 list = $('<ul/>').attr('id', "event-list").addClass("listview"),
                 month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -89,7 +91,8 @@ KIJ2013.Events = function(){
                         .text(row.category);
                     item.data('guid', row.guid);
                     item.click(onClickEventItem);
-                    item.append(datetext).append(text).append(remind).append(category);
+                    item.append(datetext).append(text)
+                        .append(remind).append(category);
                     li.append(item);
                     list.append(li);
                 }
@@ -102,8 +105,10 @@ KIJ2013.Events = function(){
 
     displayEvent = function(guid){
         KIJ2013.setActionBarUp(displayEventsList);
+        var subcamp = KIJ2013.getPreference('subcamp');
         KIJ2013.sql('SELECT title,date,remind,category,description FROM `' +
-                TABLE_NAME + '` WHERE guid = ? LIMIT 1', [guid],
+                TABLE_NAME + '` WHERE guid = ? AND ' +
+                '(`category` = ? OR `category` = "all") LIMIT 1', [guid,subcamp],
                 function(tx, result){
             if(result.rows.length == 1)
             {
@@ -143,9 +148,10 @@ KIJ2013.Events = function(){
 
     return {
         init: function() {
-            KIJ2013.init();
+            KIJ2013.init(function(){
+                displayEventsList();
+            });
             createDatabase();
-            displayEventsList();
             fetchItems();
             // Hides mobile browser's address bar when page is done loading.
             setTimeout(function() {window.scrollTo(0, 1);}, 1);

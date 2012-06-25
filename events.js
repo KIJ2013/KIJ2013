@@ -39,9 +39,22 @@ KIJ2013.Events = function(){
         });
     },
 
-    onClickEventItem = function(event)
+    onClickEventItem = function()
     {
         displayEvent($(this).data('guid'));
+    },
+
+    onClickRemind = function(event)
+    {
+        var guid = event.data.guid,
+            className = "selected",
+            remind;
+        remind = $(this).toggleClass(className).hasClass(className);
+        KIJ2013.db.transaction(function(tx){
+            tx.executeSql('UPDATE ' + TABLE_NAME + ' SET `remind` = ? ' +
+                'WHERE `guid` = ?', [remind?1:0, guid]);
+        });
+        return false;
     },
 
     displayEventsList = function()
@@ -62,8 +75,9 @@ KIJ2013.Events = function(){
                     for(;i<len;i++)
                     {
                         var row = result.rows.item(i),
+                            guid = row.guid,
                             li = $('<li/>'),
-                            item = $('<a/>').attr('id', row.guid),
+                            item = $('<a/>').attr('id', guid),
                             date = new Date(row.date*1000),
                             datetext = $('<p/>')
                             .addClass('date-text')
@@ -74,7 +88,8 @@ KIJ2013.Events = function(){
                             remind = $('<a/>')
                             .addClass('remind-btn button')
                             .addClass(row.remind ? 'selected' : '')
-                            .text('Remind'),
+                            .text('Remind')
+                            .click({guid:guid},onClickRemind),
                             category = $('<p/>')
                             .addClass('category')
                             .text(row.category);
@@ -113,6 +128,7 @@ KIJ2013.Events = function(){
                         .addClass('button')
                         .addClass(item.remind ? 'selected' : '')
                         .text('Remind')
+                        .click({guid:guid},onClickRemind)
                         .appendTo(content);
                     $('<p/>')
                         .attr('id', "remind-text")

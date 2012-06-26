@@ -6,7 +6,6 @@ html, body
 body 
 {
     background-color: #ffcc33;
-    /*background-image: url(bg_flick.png);*/
     background-repeat: no-repeat;
     background-position: 100% 100%;
     font-family: sans-serif;
@@ -60,7 +59,6 @@ ul.listview li a
     background-position: 0 50%;
     height: 72px;
     text-align: center;
-    /*-webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(50%, transparent), to(white));*/
 }
 #action_bar {
     background-color: #DDD;

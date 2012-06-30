@@ -211,3 +211,7 @@ button:active,
     position: absolute;
     right: 5px;
 }
+#body.debug p {
+    margin: 0;
+    padding: 10px;
+}

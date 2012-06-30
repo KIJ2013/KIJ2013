@@ -193,7 +193,7 @@ button:active,
     position: absolute;
     right: 5px;
 }
-#body.debug p {
+#debug p {
     margin: 0;
     padding: 10px;
 }

@@ -197,3 +197,13 @@ button:active,
     margin: 0;
     padding: 10px;
 }
+#map {
+    position: relative;
+}
+#marker {
+    background-image: url(../img/scoutpointer.png);
+    display: none;
+    height: 38px;
+    position: absolute;
+    width: 24px;
+}

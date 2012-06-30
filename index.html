@@ -7,14 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
     <link rel="apple-touch-icon-precomposed" href="img/apple-touch-icon.png" />
-    <script type="text/javascript">
-        // Hides mobile browser's address bar when page is done loading.
-        window.addEventListener('load', function(e) {
-            setTimeout(function() { window.scrollTo(0, 1); }, 1);
-        }, false);
-    </script>
   </head>
-  <body onload="">
+  <body>
     <div id="action_bar">
         <a id="up-button">
             <img id="up-icon" src="img/1-navigation-previous-item.png"/><img id="app-icon" src="img/icon.png" height="32"/>
@@ -35,7 +29,6 @@
         <section id="news"></section>
         <section id="events"></section>
         <section id="map">
-            <img src="img/map.png" />
             <div id="marker"></div>
         </section>
         <section id="debug">

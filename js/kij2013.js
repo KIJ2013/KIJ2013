@@ -408,17 +408,25 @@ KIJ2013.Map = function(){
                 return img_size[1];
             return (lat-img_bounds[1])*yScale;
         },
+        img,
         marker,
         initialised=false;
     return {
         init: function(){
             if(!initialised){
+                img = $('#map img');
+                if(img.length == 0)
+                {
+                    KIJ2013.showLoading();
+                    img = $('<img />').attr('src', "img/map.png")
+                        .appendTo('#map').load(KIJ2013.hideLoading);
+                }
                 marker = $('#marker');
-                initialised = false;
+                initialised = true;
             }
             KIJ2013.setTitle('Map');
             KIJ2013.setActionBarUp('Menu');
-            setTimeout(function(){KIJ2013.Map.moveTo(51.3, 0.585)},1);
+            setTimeout(function(){KIJ2013.Map.moveTo(51.3, 0.585)},2);
             KIJ2013.Map.mark(51.3, 0.585);
         },
         moveTo: function(lat, lon)

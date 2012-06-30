@@ -63,13 +63,14 @@ ul.listview li a
 }
 #action_bar {
     background-color: #DDD;
-    height: 48px;
     border-bottom: 1px solid #A9A9A9;
-    position: fixed;
-    top: 0;
+    box-shadow: 0 0 10px 3px black;
+    height: 48px;
     left: 0;
-    right: 0;
     overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 0;
     white-space: nowrap;
     z-index: 1;
 }

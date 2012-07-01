@@ -24,9 +24,10 @@ var KIJ2013 = function(){
               '` (`key` varchar(255) PRIMARY KEY,`value` varchar(255))');
             this.sql("SELECT key,value FROM " + TABLE_PREFERENCES, [],
               function(tx,results){
-                for(var i=0;i<results.rows.length;i++)
+                  var i, item;
+                for(i=0;i<results.rows.length;i++)
                 {
-                    var item = results.rows.item(i);
+                    item = results.rows.item(i);
                     preferences[item.key] = item.value;
                 }
                 if(typeof callback == "function"){
@@ -182,15 +183,19 @@ KIJ2013.News = function(){
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME + '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
                 var len = result.rows.length,
-                    list = $('<ul/>').attr('id',"news-list").addClass("listview"),
-                    i=0;
+                    list,
+                    i,
+                    row,
+                    li,
+                    item;
                 if(len)
                 {
-                    for(;i<len;i++)
+                    list = $('<ul/>').attr('id',"news-list").addClass("listview");
+                    for(i=0;i<len;i++)
                     {
-                        var row = result.rows.item(i),
-                            li = $('<li/>'),
-                            item = $('<a/>').attr('id', row.guid).text(row.title);
+                        row = result.rows.item(i);
+                        li = $('<li/>');
+                        item = $('<a/>').attr('id', row.guid).text(row.title);
                         item.data('guid', row.guid);
                         item.click(onClickNewsItem);
                         li.append(item);
@@ -208,7 +213,8 @@ KIJ2013.News = function(){
     displayNewsItem = function(guid){
         KIJ2013.setActionBarUp(displayNewsList);
         KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME + '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
+            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
+                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
                 if(result.rows.length == 1)
                 {
                     var item = result.rows.item(0),
@@ -294,32 +300,42 @@ KIJ2013.Events = function(){
                 '` WHERE `date` > ? AND (`category` = ? OR `category` = "all") ' +
                 'ORDER BY `date` ASC LIMIT 30',
                 [(new Date())/1000,subcamp], function(tx, result){
-            var len = result.rows.length,
-                list = $('<ul/>').attr('id', "event-list").addClass("listview"),
-                month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                i=0;
+                len = result.rows.length,
+                list,
+                i,
+                row,
+                guid,
+                li,
+                item,
+                date,
+                datetext,
+                text,
+                remind,
+                category;
             if(len)
             {
-                for(;i<len;i++)
+                list = $('<ul/>').attr('id', "event-list").addClass("listview");
+                for(i=0;i<len;i++)
                 {
-                    var row = result.rows.item(i),
-                        guid = row.guid,
-                        li = $('<li/>'),
-                        item = $('<a/>').attr('id', guid),
-                        date = new Date(row.date*1000),
-                        datetext = $('<p/>')
+                    row = result.rows.item(i);
+                    guid = row.guid;
+                    li = $('<li/>');
+                    item = $('<a/>').attr('id', guid);
+                    date = new Date(row.date*1000);
+                    datetext = $('<p/>')
                         .addClass('date-text')
-                        .text(date.getDate() + " " + month[date.getMonth()]),
-                        text = $('<p/>')
+                        .text(date.getDate() + " " + month[date.getMonth()]);
+                    text = $('<p/>')
                         .addClass('title')
-                        .text(row.title),
-                        remind = $('<a/>')
+                        .text(row.title);
+                    remind = $('<a/>')
                         .addClass('remind-btn button')
                         .addClass(row.remind ? 'selected' : '')
                         .text('Remind')
-                        .click({guid:guid},onClickRemind),
-                        category = $('<p/>')
+                        .click({guid:guid},onClickRemind);
+                    category = $('<p/>')
                         .addClass('category')
                         .text(row.category);
                     item.data('guid', row.guid);

@@ -394,23 +394,25 @@ KIJ2013.Map = function(){
         img_size = [2516,1867],
         xScale = img_size[0]/(img_bounds[2]-img_bounds[0]),
         yScale = img_size[1]/(img_bounds[3]-img_bounds[1]),
-        lonToX = function(lon){
-            if(lon<img_bounds[0])
-                return 0;
-            if(lon>img_bounds[2])
-                return img_size[0];
-            return (lon-img_bounds[0])*xScale;
-        },
-        latToY = function(lat){
-            if(lat<img_bounds[1])
-                return 0;
-            if(lat>img_bounds[3])
-                return img_size[1];
-            return (lat-img_bounds[1])*yScale;
-        },
         img,
         marker,
-        initialised=false;
+        initialised=false,
+
+        lonToX = function(lon){
+            if(lon<img_bounds[0])
+                throw "OutOfBounds";
+            if(lon>img_bounds[2])
+                throw "OutOfBounds";
+            return (lon-img_bounds[0])*xScale;
+        },
+
+        latToY = function(lat){
+            if(lat<img_bounds[1])
+                throw "OutOfBounds";
+            if(lat>img_bounds[3])
+                throw "OutOfBounds";
+            return (lat-img_bounds[1])*yScale;
+        };
     return {
         init: function(){
             if(!initialised){
@@ -426,16 +428,31 @@ KIJ2013.Map = function(){
             }
             KIJ2013.setTitle('Map');
             KIJ2013.setActionBarUp('Menu');
-            setTimeout(function(){KIJ2013.Map.moveTo(51.3, 0.585)},2);
-            KIJ2013.Map.mark(51.3, 0.585);
+            if(navigator.geolocation)
+            {
+                navigator.geolocation.getCurrentPosition(function(position){
+                    var coords = position.coords,
+                        lat = coords.latitude,
+                        lon = coords.longitude;
+                    KIJ2013.Map.mark(lat, lon);
+                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+                }, function(){KIJ2013.showError('Error Finding Location')});
+            }
         },
         moveTo: function(lat, lon)
         {
-            window.scrollTo(lonToX(lon), latToY(lat));
+            try {
+                window.scrollTo(lonToX(lon), latToY(lat));
+            }
+            catch (e){}
         },
         mark: function(lat, lon)
         {
-            marker.css({display: 'block', left: lonToX(lon), top: latToY(lat)});
+            try {
+                marker.css({display: 'block', bottom: latToY(lat),
+                    left: lonToX(lon)});
+            }
+            catch (e){}
         },
         unmark: function(){
             marker.css({display: 'none'});

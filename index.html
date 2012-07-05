@@ -1,36 +1,51 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <title>KIJ 2013</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>KIJ2013</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/leaflet.css" />
     <link rel="shortcut icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png" />
-    <script type="text/javascript">
-        // Hides mobile browser's address bar when page is done loading.
-        window.addEventListener('load', function(e) {
-            setTimeout(function() { window.scrollTo(0, 1); }, 1);
-        }, false);
-    </script>
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" href="img/apple-touch-icon.png" />
   </head>
-  <body onload="">
+  <body>
     <div id="action_bar">
-        <a href="index.html">
-            <img /><img id="appicon" src="icon.png" height="32"/>
+        <a id="up-button">
+            <img id="up-icon" src="img/1-navigation-previous-item.png"/><img id="app-icon" src="img/icon.png" height="32"/>
         </a>
-        <h1>KIJ 2013</h1>
+        <h1>KIJ2013</h1>
     </div>
     <div id="body">
-        <div id="header_image" title="Header Picture"></div>
-        <ul class="gridview">
-            <li><a href="news.html"><img src="ic_news.png" /><br>News</a></li>
-            <li><a href="events.html"><img src="ic_events.png" /><br>Events</a></li>
-            <li><a href="map.html"><img src="ic_map.png" /><br>Map</a></li>
-            <li><a href="#"><img src="ic_radio.png" /><br>Radio</a></li>
-            <li><a href="#"><img src="ic_barcode.png" /><br>Barcode</a></li>
-            <li><a href="debug.html"><img src="ic_debug.png" /><br>Debug</a></li>
-        </ul>
+        <section id="menu">
+            <ul class="gridview">
+                <li><a><img src="img/ic_news.png" /><br>News</a></li>
+                <li><a><img src="img/ic_events.png" /><br>Events</a></li>
+                <li><a><img src="img/ic_map.png" /><br>Map</a></li>
+                <li><a><img src="img/ic_radio.png" /><br>Radio</a></li>
+                <li><a><img src="img/ic_barcode.png" /><br>Barcode</a></li>
+                <li><a><img src="img/ic_debug.png" /><br>Debug</a></li>
+            </ul>
+        </section>
+        <section id="news"></section>
+        <section id="events"></section>
+        <section id="map">
+            <div id="marker"></div>
+        </section>
+        <section id="debug">
+            <p>
+                <button id="clear-news">Clear News</button>
+                <button id="clear-events">Clear Events</button><br/>
+            </p>
+            <p>
+                <label for="subcamp">Sub-Camp:</label>
+                <input id="subcamp" />
+                <button id="set-subcamp">Set Sub-Camp</button>
+            </p>
+        </section>
     </div>
+    <script src="js/jquery-1.7.1.min.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/kij2013.js"></script>
   </body>
 </html>

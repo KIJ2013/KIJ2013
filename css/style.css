@@ -1,16 +1,15 @@
-html, body 
+html, body
 {
+    height: 100%;
     margin: 0 auto;
     position: relative;
 }
 body 
 {
     background-color: #ffcc33;
-    /*background-image: url(bg_flick.png);*/
     background-repeat: no-repeat;
     background-position: 100% 100%;
     font-family: sans-serif;
-    min-height: 570px;
 }
 
 ul {
@@ -53,6 +52,7 @@ ul.listview li a
 }
 #body {
     margin-top: 48px;
+    height: 100%;
 }
 #header_image {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/02/kij2009opening.jpg);
@@ -60,17 +60,17 @@ ul.listview li a
     background-position: 0 50%;
     height: 72px;
     text-align: center;
-    /*-webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(50%, transparent), to(white));*/
 }
 #action_bar {
     background-color: #DDD;
-    height: 48px;
     border-bottom: 1px solid #A9A9A9;
-    position: fixed;
-    top: 0;
+    box-shadow: 0 0 10px 3px black;
+    height: 48px;
     left: 0;
-    right: 0;
     overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 0;
     white-space: nowrap;
     z-index: 1;
 }
@@ -116,6 +116,23 @@ ul.listview li a
     text-align: center;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+}
+#menu {
+    background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/05/Jamboree-TV-Block-Group-Photo-1024x682.jpg);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    height: 100%
+}
+#menu li {
+    display: inline-block;
+    text-align: center;
+    width: 134px;
+    background: #FC3;
+    border-radius: .3em;
+    box-shadow: .1em .1em .5em rgba(0, 0, 0, .6) inset;
+    margin-top: 10px;
+    padding: 10px 0;
+    border: 1px solid #B91;
 }
 #news-list li {
     line-height: 48px;
@@ -194,4 +211,18 @@ button:active,
     bottom: 5px;
     position: absolute;
     right: 5px;
+}
+#debug p {
+    margin: 0;
+    padding: 10px;
+}
+#map {
+    position: relative;
+}
+#marker {
+    background-image: url(../img/scoutpointer.png);
+    display: none;
+    height: 38px;
+    position: absolute;
+    width: 24px;
 }

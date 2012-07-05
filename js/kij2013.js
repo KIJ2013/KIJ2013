@@ -475,6 +475,41 @@ KIJ2013.Map = function(){
         }
     }
 }();
+KIJ2013.Barcode = function(){
+    var video = $('#live')[0],
+        canvas = $('canvas')[0],
+        ctx = canvas.getContext('2d'),
+        localMediaStream = null,
+        snapshot = function (){
+            if(localMediaStream){
+                ctx.drawImage(video,0,0);
+                qrcode.decode(canvas.toDataURL('image/webp'));
+            }
+        };
+
+    $('#barcode button').click(snapshot);
+    qrcode.callback = function (a)
+    {
+        if(a) alert(a);
+    };
+    return {
+        init: function(){
+            KIJ2013.setTitle('Barcode');
+            KIJ2013.setActionBarUp('Menu');
+
+            navigator.webkitGetUserMedia({video:true},
+                function(stream) {
+                    video.src = window.webkitURL.createObjectURL(stream);
+                    localMediaStream = stream;
+                    setInterval(snapshot, 1000);
+                },
+                function(err) {
+                    console.log("Unable to get video stream!")
+                }
+            );
+        }
+    }
+}();
 KIJ2013.Debug = function(){
 
     /**
@@ -508,7 +543,7 @@ KIJ2013.Debug = function(){
                 initialised = true;
             }
             KIJ2013.setTitle('Debug');
-            KIJ2013.setActionBarUp('Menu')
+            KIJ2013.setActionBarUp('Menu');
         }
     }
 }();

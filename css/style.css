@@ -226,3 +226,10 @@ button:active,
     position: absolute;
     width: 24px;
 }
+canvas {
+    display: none;
+}
+video {
+    width: 100%;
+    -webkit-transform: rotate(270deg) translateX(-100px);
+}

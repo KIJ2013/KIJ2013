@@ -410,7 +410,7 @@ KIJ2013.Map = function(){
         img_size = [2516,1867],
         xScale = img_size[0]/(img_bounds[2]-img_bounds[0]),
         yScale = img_size[1]/(img_bounds[3]-img_bounds[1]),
-        img,
+        map,
         marker,
         initialised=false,
 
@@ -431,28 +431,34 @@ KIJ2013.Map = function(){
         };
     return {
         init: function(){
-            if(!initialised){
-                img = $('#map img');
-                if(img.length == 0)
-                {
-                    KIJ2013.showLoading();
-                    img = $('<img />').attr('src', "img/map.png")
-                        .appendTo('#map').load(KIJ2013.hideLoading);
-                }
-                marker = $('#marker');
-                initialised = true;
-            }
             KIJ2013.setTitle('Map');
             KIJ2013.setActionBarUp('Menu');
-            if(navigator.geolocation)
-            {
-                navigator.geolocation.getCurrentPosition(function(position){
-                    var coords = position.coords,
-                        lat = coords.latitude,
-                        lon = coords.longitude;
-                    KIJ2013.Map.mark(lat, lon);
-                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
-                }, function(){KIJ2013.showError('Error Finding Location')});
+            if(!initialised){
+                KIJ2013.showLoading();
+                var bounds = new L.LatLngBounds(
+                        new L.LatLng(51.299361979488744,0.5785846710205073),
+                        new L.LatLng(51.305519711648124,0.5925965309143088)),
+                    layer = new L.ImageOverlay("img/map.png", bounds),
+                    map = KIJ2013.Map.map = new L.Map('body', {
+                    minZoom: 16,
+                    maxZoom: 18,
+                    maxBounds: bounds
+                });
+                map.addLayer(layer);
+                map.setView(new L.LatLng(51.302,0.585),17);
+                map.locate();
+                map.on('locationfound', function(e) {
+                    var radius = e.accuracy / 2;
+                    if(bounds.contains(e.latlng)){
+                        var marker = new L.Marker(e.latlng);
+                        KIJ2013.Map.map.addLayer(marker);
+                        marker.bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+                        var circle = new L.Circle(e.latlng, radius);
+                        KIJ2013.Map.map.addLayer(circle);
+                    }
+                });
+                initialised = true;
             }
         },
         moveTo: function(lat, lon)

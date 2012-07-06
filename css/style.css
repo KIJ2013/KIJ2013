@@ -20,6 +20,7 @@ ul {
 }
 ul.listview {
     margin: 0;
+    padding-top: 10px;
 }
 ul.listview li {
     border-bottom: 1px solid #333;
@@ -225,6 +226,10 @@ button:active,
     height: 38px;
     position: absolute;
     width: 24px;
+}
+#learn .intro {
+    padding-top: 10px;
+    text-align: center;
 }
 canvas {
     display: none;

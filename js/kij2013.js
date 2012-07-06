@@ -475,6 +475,107 @@ KIJ2013.Map = function(){
         }
     }
 }();
+KIJ2013.Learn = function(){
+    var TABLE_NAME = "learn",
+        baseURL = "learn.php?id=",
+    createTable = function() {
+        KIJ2013.db.transaction(function(tx){
+            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
+                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
+                '`date` int, `description` text)');
+        });
+    },
+    onClickLearnItem = function(){
+        displayItem($(this).data('guid'));
+    },
+    displayFoundList = function()
+    {
+        KIJ2013.setActionBarUp('Menu');
+        KIJ2013.setTitle('Learn');
+        KIJ2013.db.readTransaction(function(tx){
+            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME +
+                '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
+                var len = result.rows.length,
+                    list,
+                    i,
+                    row,
+                    li,
+                    item,
+                    title;
+                if(len)
+                {
+                    list = $('<ul/>').attr('id',"learn-list")
+                        .addClass("listview");
+                    for(i=0;i<len;i++)
+                    {
+                        row = result.rows.item(i);
+                        li = $('<li/>');
+                        title = row.title || "* New item";
+                        item = $('<a/>').attr('id', row.guid).text(title);
+                        item.data('guid', row.guid);
+                        item.click(onClickLearnItem);
+                        li.append(item);
+                        list.append(li);
+                    }
+                    $('#learn').empty().append(list);
+                }
+            });
+        });
+    },
+    displayItem = function(guid){
+        KIJ2013.setActionBarUp(displayFoundList);
+        KIJ2013.db.readTransaction(function(tx){
+            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
+                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
+                if(result.rows.length == 1)
+                {
+                    var item = result.rows.item(0),
+                        content = $('<div/>').css({"padding": "10px"});
+                    if(!item.description){
+                        KIJ2013.showLoading();
+                        loadItem(guid, function(){
+                            KIJ2013.hideLoading();
+                            displayItem(guid);
+                        });
+                    }
+                    else
+                    {
+                        KIJ2013.setTitle(item.title);
+                        $('<h1/>').text(item.title).appendTo(content);
+                        content.append(item.description);
+                        $('#learn').empty().append(content);
+                        setTimeout(function() {window.scrollTo(0, 1);}, 1);
+                    }
+                }
+            });
+        });
+    },
+    loadItem = function(id, callback){
+        $.get(baseURL + id, function(data){
+            KIJ2013.db.transaction(function(tx){
+                tx.executeSql('UPDATE `' + TABLE_NAME +
+                        '` SET `title` = ?, `description` = ? WHERE `guid` = ?',
+                    [data.title, data.description, id]);
+                if(typeof callback == "function")
+                    callback();
+            });
+        })
+    };
+    return {
+        init: function(){
+            createTable();
+            displayFoundList();
+        },
+        // Mark an item as found by inserting it into the database
+        add: function(id){
+            KIJ2013.db.transaction(function(tx){
+                var date = (new Date())/1000;
+                tx.executeSql('INSERT INTO `' + TABLE_NAME +
+                        '` (`guid`,`date`) VALUES (?, ?)', [id, date]);
+            });
+        }
+    }
+}();
 KIJ2013.Barcode = function(){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],

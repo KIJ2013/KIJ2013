@@ -3,7 +3,7 @@ var KIJ2013 = function(){
         TABLE_PREFERENCES = "preferences",
         loading,
         popup;
-    
+
     return {
         db: null,
         /**
@@ -477,7 +477,7 @@ KIJ2013.Map = function(){
 }();
 KIJ2013.Barcode = function(){
     var video = $('#live')[0],
-        canvas = $('canvas')[0],
+        canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
         localMediaStream = null,
         snapshot = function (){
@@ -485,9 +485,24 @@ KIJ2013.Barcode = function(){
                 ctx.drawImage(video,0,0);
                 qrcode.decode(canvas.toDataURL('image/webp'));
             }
-        };
-
-    $('#barcode button').click(snapshot);
+        },
+        nav = navigator,
+        win = window,
+        createObjectURL;
+    canvas.width = 640;
+    canvas.height = 480;
+    // Normalise getUserMedia
+    nav.getUserMedia ||
+        (nav.getUserMedia = nav.webkitGetUserMedia);
+    // Normalise window URL
+    win.URL ||
+        (win.URL = win.webkitURL || win.msURL || win.oURL);
+    // Avoid opera quirk
+    createObjectURL = function(stream){
+        return (win.URL && win.URL.createObjectURL) ?
+            win.URL.createObjectURL(stream) : stream;
+    };
+    // Set callback for detection of QR Code
     qrcode.callback = function (a)
     {
         if(a) alert(a);
@@ -497,9 +512,11 @@ KIJ2013.Barcode = function(){
             KIJ2013.setTitle('Barcode');
             KIJ2013.setActionBarUp('Menu');
 
-            navigator.webkitGetUserMedia({video:true},
+            nav.getUserMedia({video:true},
                 function(stream) {
-                    video.src = window.webkitURL.createObjectURL(stream);
+                    // Display Preview
+                    video.src = createObjectURL(stream);
+                    // Keep reference to stream for snapshots
                     localMediaStream = stream;
                     setInterval(snapshot, 1000);
                 },

@@ -2,6 +2,7 @@ var KIJ2013 = function(){
     var preferences = {},
         TABLE_PREFERENCES = "preferences",
         loading,
+        beingLoaded,
         popup;
 
     return {
@@ -106,12 +107,17 @@ var KIJ2013 = function(){
                 loading = $('<div/>').attr('id', 'loading')
                     .text("Loading").append(
                         $('<img/>').attr('src',"img/ajax-loader.gif"))
-                    .appendTo('body');
+                    .appendTo('#body');
             }
+            beingLoaded = $('section:visible').hide();
             loading.show();
         },
         hideLoading: function(){
             loading.hide();
+            if(beingLoaded){
+                beingLoaded.show();
+                beingLoaded = null;
+            }
         },
         showError: function(message)
         {

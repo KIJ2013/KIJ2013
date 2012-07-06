@@ -512,18 +512,23 @@ KIJ2013.Barcode = function(){
             KIJ2013.setTitle('Barcode');
             KIJ2013.setActionBarUp('Menu');
 
-            nav.getUserMedia({video:true},
-                function(stream) {
-                    // Display Preview
-                    video.src = createObjectURL(stream);
-                    // Keep reference to stream for snapshots
-                    localMediaStream = stream;
-                    setInterval(snapshot, 1000);
-                },
-                function(err) {
-                    console.log("Unable to get video stream!")
-                }
-            );
+            if(nav.getUserMedia){
+                nav.getUserMedia({video:true},
+                    function(stream) {
+                        // Display Preview
+                        video.src = createObjectURL(stream);
+                        // Keep reference to stream for snapshots
+                        localMediaStream = stream;
+                        setInterval(snapshot, 1000);
+                    },
+                    function(err) {
+                        console.log("Unable to get video stream!")
+                    }
+                );
+            }
+            else
+                KIJ2013.showError('Barcode Scanner is not available on your '
+                    + 'platform.')
         }
     }
 }();

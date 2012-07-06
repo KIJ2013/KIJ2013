@@ -606,7 +606,15 @@ KIJ2013.Barcode = function(){
     // Set callback for detection of QR Code
     qrcode.callback = function (a)
     {
-        if(a) alert(a);
+        if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+        {
+            KIJ2013.Learn.add(a.slice(26));
+            alert("Congratulations you found an item.");
+            KIJ2013.navigateTo('Learn');
+        }
+        else if(a){
+            alert(a);
+        }
     };
     return {
         init: function(){

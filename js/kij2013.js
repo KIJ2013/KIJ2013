@@ -65,6 +65,8 @@ var KIJ2013 = function(){
         navigateTo: function(name) {
             $('section').hide();
             $('#'+name.toLowerCase()).show();
+            KIJ2013.setActionBarUp('Menu');
+            KIJ2013.setTitle(name);
             if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
                 KIJ2013[name].init();
             setTimeout(function() {window.scrollTo(0, 1);}, 1);
@@ -442,8 +444,6 @@ KIJ2013.Map = function(){
                 marker = $('#marker');
                 initialised = true;
             }
-            KIJ2013.setTitle('Map');
-            KIJ2013.setActionBarUp('Menu');
             if(navigator.geolocation)
             {
                 navigator.geolocation.getCurrentPosition(function(position){
@@ -509,8 +509,6 @@ KIJ2013.Barcode = function(){
     };
     return {
         init: function(){
-            KIJ2013.setTitle('Barcode');
-            KIJ2013.setActionBarUp('Menu');
 
             if(nav.getUserMedia){
                 nav.getUserMedia({video:true},
@@ -564,8 +562,6 @@ KIJ2013.Debug = function(){
                 });
                 initialised = true;
             }
-            KIJ2013.setTitle('Debug');
-            KIJ2013.setActionBarUp('Menu');
         }
     }
 }();

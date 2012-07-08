@@ -226,3 +226,9 @@ button:active,
     position: absolute;
     width: 24px;
 }
+#radio {
+    text-align: center;
+}
+#controls .button {
+    display: inline-block;
+}

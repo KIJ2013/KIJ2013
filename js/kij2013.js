@@ -494,7 +494,6 @@ KIJ2013.Radio = function(){
                     errorAlerts: true
                 });
                 loaded = true;
-                $("#jplayer-inspector").jPlayerInspector({jPlayer:$("#player")})
             }
             KIJ2013.setTitle('Radio');
             KIJ2013.setActionBarUp('Menu')

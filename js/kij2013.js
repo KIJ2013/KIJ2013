@@ -547,6 +547,11 @@ KIJ2013.Learn = function(){
                         loadItem(guid, function(){
                             KIJ2013.hideLoading();
                             displayItem(guid);
+                        },function(){
+                            KIJ2013.hideLoading();
+                            KIJ2013.showError('Sorry, Could not find any '+
+                                'information on that item.')
+                            displayFoundList();
                         });
                     }
                     else
@@ -560,16 +565,16 @@ KIJ2013.Learn = function(){
             });
         });
     },
-    loadItem = function(id, callback){
+    loadItem = function(id, success, error){
         $.get(baseURL + id, function(data){
             KIJ2013.db.transaction(function(tx){
                 tx.executeSql('UPDATE `' + TABLE_NAME +
                         '` SET `title` = ?, `description` = ? WHERE `guid` = ?',
                     [data.title, data.description, id]);
-                if(typeof callback == "function")
-                    callback();
             });
         })
+        .success(success)
+        .error(error);
     };
     return {
         init: function(){

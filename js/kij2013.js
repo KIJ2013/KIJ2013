@@ -70,7 +70,7 @@ var KIJ2013 = function(){
             KIJ2013.setTitle(name);
             if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
                 KIJ2013[name].init();
-            setTimeout(function() {window.scrollTo(0, 1);}, 1);
+            KIJ2013.scrollTop();
         },
         setActionBarUp: function(fn)
         {
@@ -129,6 +129,9 @@ var KIJ2013 = function(){
             setTimeout(function(){
                 popup.slideUp('normal')
             },5000);
+        },
+        scrollTop: function(){
+            setTimeout(function() {window.scrollTo(0, 1);}, 10);
         }
     }
 }();
@@ -137,7 +140,6 @@ KIJ2013.Menu = function(){
         init: function(){
             KIJ2013.setActionBarUp();
             KIJ2013.setTitle();
-            setTimeout(function(){window.scrollTo(0,1)},1);
         }
     }
 }();
@@ -188,6 +190,7 @@ KIJ2013.News = function(){
     {
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('News');
+        KIJ2013.scrollTop();
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME + '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
                 var len = result.rows.length,
@@ -231,7 +234,7 @@ KIJ2013.News = function(){
                     $('<h1/>').text(item.title).appendTo(content);
                     content.append(item.description);
                     $('#news').empty().append(content);
-                    setTimeout(function() {window.scrollTo(0, 1);}, 1);
+                    KIJ2013.scrollTop();
                 }
             });
         });
@@ -363,6 +366,7 @@ KIJ2013.Events = function(){
 
     displayEvent = function(guid){
         KIJ2013.setActionBarUp(displayEventsList);
+        KIJ2013.scrollTop();
         var subcamp = KIJ2013.getPreference('subcamp');
         KIJ2013.sql('SELECT title,date,remind,category,description FROM `' +
                 TABLE_NAME + '` WHERE guid = ? AND ' +
@@ -399,7 +403,6 @@ KIJ2013.Events = function(){
                     .text(item.description)
                     .appendTo(content);
                 $('#events').append(content);
-                setTimeout(function() {window.scrollTo(0, 1);}, 1);
             }
         });
     };
@@ -498,6 +501,7 @@ KIJ2013.Learn = function(){
     {
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('Learn');
+        KIJ2013.scrollTop();
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME +
                 '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
@@ -530,6 +534,7 @@ KIJ2013.Learn = function(){
     },
     displayItem = function(guid){
         KIJ2013.setActionBarUp(displayFoundList);
+        KIJ2013.scrollTop();
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
                 '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
@@ -550,7 +555,6 @@ KIJ2013.Learn = function(){
                         $('<h1/>').text(item.title).appendTo(content);
                         content.append(item.description);
                         $('#learn').empty().append(content);
-                        setTimeout(function() {window.scrollTo(0, 1);}, 1);
                     }
                 }
             });

@@ -27,12 +27,19 @@ with a compass from Cathay at the end of the
 13th Century.  The Grand Encyclopaedia credits
 an Italian marine pilot named Flavio Giojo of
 Amalfi for drawing it as the north point of the
-primitive compass he built.</p>'));
-$id = isset($_REQUEST['id']) ? $_REQUEST['id'] : 0;
-if(isset($learn[$id]))
+primitive compass he built.</p>'),
+        3 => array('title' => 'Kent International Jamboree',
+            'description' => '<p>KIJ 2013 is the 5th Kent International Jamboree.
+Previous KIJs have been held at Cudham, Sevenoaks in 2009 and Dibgate, Folkestone
+in 2003.</p>'));
+
+if(isset($_REQUEST['id']))
 {
-    echo json_encode($learn[$id]);
+    if(isset($learn[$_REQUEST['id']]))
+        echo json_encode($learn[$_REQUEST['id']]);
+    else
+        header('HTTP/1.1 404 Not Found');
 }
 else
-    header('HTTP/1.1 404 Not Found');
+    echo json_encode(array_values($learn));
 ?>

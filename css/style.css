@@ -227,12 +227,15 @@ button:active,
     position: absolute;
     width: 24px;
 }
+#radio {
+    text-align: center;
+}
+#controls .button {
+    display: inline-block;
+}
 #learn .intro {
     padding-top: 10px;
     text-align: center;
-}
-canvas {
-    display: none;
 }
 video {
     width: 100%;

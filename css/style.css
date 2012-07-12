@@ -237,6 +237,15 @@ button:active,
     padding-top: 10px;
     text-align: center;
 }
+#learn-list .highlight {
+	animation: highlight 3s;
+}
+@keyframes highlight {
+	0% {box-shadow: 0 0 20px 15px transparent;}
+	10% {box-shadow: 0 0 20px 15px black;}
+	50% {box-shadow: 0 0 20px 15px black;}
+	100% {box-shadow: 0 0 20px 15px transparent;}
+}
 video {
     width: 100%;
     -webkit-transform: rotate(270deg) translateX(-100px);

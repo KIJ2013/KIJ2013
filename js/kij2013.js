@@ -512,6 +512,8 @@ KIJ2013.Radio = function(){
 KIJ2013.Learn = function(){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
+        baseId = 'learn-',
+        highlight,
     createTable = function() {
         KIJ2013.db.transaction(function(tx){
             tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
@@ -536,7 +538,8 @@ KIJ2013.Learn = function(){
                     row,
                     li,
                     item,
-                    title;
+                    title,
+                    id;
                 if(len)
                 {
                     list = $('<ul/>').attr('id',"learn-list")
@@ -544,11 +547,17 @@ KIJ2013.Learn = function(){
                     for(i=0;i<len;i++)
                     {
                         row = result.rows.item(i);
-                        li = $('<li/>');
+                        id = row.guid;
+                        li = $('<li/>').attr('id', baseId+id);
                         title = row.title || "* New item";
-                        item = $('<a/>').attr('id', row.guid).text(title);
-                        item.data('guid', row.guid);
+                        item = $('<a/>').text(title);
+                        item.data('guid', id);
                         item.click(onClickLearnItem);
+                        if(id == highlight)
+                        {
+                            li.addClass('highlight');
+                            highlight = null;
+                        }
                         li.append(item);
                         list.append(li);
                     }
@@ -613,6 +622,18 @@ KIJ2013.Learn = function(){
                 tx.executeSql('INSERT INTO `' + TABLE_NAME +
                         '` (`guid`,`date`) VALUES (?, ?)', [id, date]);
             });
+        },
+        highlight: function(id){
+            var el = $('#'+baseId+id),
+                cl = 'highlight';
+            if(el.length)
+            {
+                el.addClass(cl);
+                setTimeout(function(){
+                    el.removeClass(cl);
+                },3000);
+            }
+            highlight = id;
         }
     }
 }();
@@ -649,12 +670,14 @@ KIJ2013.Barcode = function(){
     qrcode.callback = function (a)
     {
         if(a){
+            var id = a.slice(26);
             if(a.slice(0,26) == "http://kij13.org.uk/learn/")
             {
                 KIJ2013.Barcode.stop();
-                KIJ2013.Learn.add(a.slice(26));
+                KIJ2013.Learn.add(id);
                 alert("Congratulations you found an item.");
                 KIJ2013.navigateTo('Learn');
+                KIJ2013.Learn.highlight(id);
             }
             else
                 alert(a);
@@ -702,6 +725,7 @@ KIJ2013.Debug = function(){
      */
     var TABLE_NEWS = "news",
         TABLE_EVENTS = "events",
+        TABLE_LEARN = "learn",
         initialised = false;
 
     return {
@@ -718,6 +742,12 @@ KIJ2013.Debug = function(){
                     KIJ2013.db.transaction(function(tx){
                         tx.executeSql('DELETE FROM ' + TABLE_EVENTS);
                         alert("Events Cleared");
+                    });
+                });
+                $('#clear-learn').click(function(){
+                    KIJ2013.db.transaction(function(tx){
+                        tx.executeSql('DELETE FROM ' + TABLE_LEARN);
+                        alert("Learn Cleared");
                     });
                 });
                 $('#set-subcamp').click(function(){

@@ -22,6 +22,7 @@
                 <li><a><img src="img/ic_events.png" /><br>Events</a></li>
                 <li><a><img src="img/ic_map.png" /><br>Map</a></li>
                 <li><a><img src="img/ic_radio.png" /><br>Radio</a></li>
+                <li><a><img src="img/ic_learn.png" /><br>Learn</a></li>
                 <li><a><img src="img/ic_barcode.png" /><br>Barcode</a></li>
                 <li><a><img src="img/ic_debug.png" /><br>Debug</a></li>
             </ul>
@@ -39,10 +40,22 @@
         <section id="map">
             <div id="marker"></div>
         </section>
+        <section id="learn">
+            <div class="intro">
+                <p>You have not found any items yet.</p>
+                <p>Find them by scanning QR codes (like those below) around the
+                    site.</p>
+                <img src="img/qr_sample.png" />
+            </div>
+        </section>
+        <section id="barcode">
+            <video id="live" autoplay></video>
+        </section>
         <section id="debug">
             <p>
                 <button id="clear-news">Clear News</button>
-                <button id="clear-events">Clear Events</button><br/>
+                <button id="clear-events">Clear Events</button>
+                <button id="clear-learn">Clear Learn</button><br/>
             </p>
             <p>
                 <label for="subcamp">Sub-Camp:</label>
@@ -51,8 +64,10 @@
             </p>
         </section>
     </div>
+    <script src="js/prefixfree.min.js"></script>
     <script src="js/jquery-1.7.1.min.js"></script>
     <script src="js/jquery.jplayer.min.js"></script>
+    <script src="js/qrcode.js"></script>
     <script src="js/kij2013.js"></script>
   </body>
 </html>

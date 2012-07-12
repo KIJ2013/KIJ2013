@@ -2,8 +2,9 @@ var KIJ2013 = function(){
     var preferences = {},
         TABLE_PREFERENCES = "preferences",
         loading,
+        beingLoaded,
         popup;
-    
+
     return {
         db: null,
         /**
@@ -63,11 +64,21 @@ var KIJ2013 = function(){
                 "(key,value) VALUES (?,?)",[name,value]);
         },
         navigateTo: function(name) {
-            $('section').hide();
+            var sections = $('section:visible'),
+                nm;
+            $.each(sections, function(i,item){
+                nm = $(item).attr('id');
+                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
+                if(KIJ2013[nm] && typeof KIJ2013[nm].hide == "function")
+                    KIJ2013[nm].hide();
+            })
+            sections.hide();
             $('#'+name.toLowerCase()).show();
+            KIJ2013.setActionBarUp('Menu');
+            KIJ2013.setTitle(name);
             if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
                 KIJ2013[name].init();
-            setTimeout(function() {window.scrollTo(0, 1);}, 1);
+            KIJ2013.scrollTop();
         },
         setActionBarUp: function(fn)
         {
@@ -104,12 +115,17 @@ var KIJ2013 = function(){
                 loading = $('<div/>').attr('id', 'loading')
                     .text("Loading").append(
                         $('<img/>').attr('src',"img/ajax-loader.gif"))
-                    .appendTo('body');
+                    .appendTo('#body');
             }
+            beingLoaded = $('section:visible').hide();
             loading.show();
         },
         hideLoading: function(){
             loading.hide();
+            if(beingLoaded){
+                beingLoaded.show();
+                beingLoaded = null;
+            }
         },
         showError: function(message)
         {
@@ -121,6 +137,9 @@ var KIJ2013 = function(){
             setTimeout(function(){
                 popup.slideUp('normal')
             },5000);
+        },
+        scrollTop: function(){
+            setTimeout(function() {window.scrollTo(0, 1);}, 10);
         }
     }
 }();
@@ -129,7 +148,6 @@ KIJ2013.Menu = function(){
         init: function(){
             KIJ2013.setActionBarUp();
             KIJ2013.setTitle();
-            setTimeout(function(){window.scrollTo(0,1)},1);
         }
     }
 }();
@@ -180,6 +198,7 @@ KIJ2013.News = function(){
     {
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('News');
+        KIJ2013.scrollTop();
         KIJ2013.db.readTransaction(function(tx){
             tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME + '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
                 var len = result.rows.length,
@@ -223,7 +242,7 @@ KIJ2013.News = function(){
                     $('<h1/>').text(item.title).appendTo(content);
                     content.append(item.description);
                     $('#news').empty().append(content);
-                    setTimeout(function() {window.scrollTo(0, 1);}, 1);
+                    KIJ2013.scrollTop();
                 }
             });
         });
@@ -355,6 +374,7 @@ KIJ2013.Events = function(){
 
     displayEvent = function(guid){
         KIJ2013.setActionBarUp(displayEventsList);
+        KIJ2013.scrollTop();
         var subcamp = KIJ2013.getPreference('subcamp');
         KIJ2013.sql('SELECT title,date,remind,category,description FROM `' +
                 TABLE_NAME + '` WHERE guid = ? AND ' +
@@ -391,7 +411,6 @@ KIJ2013.Events = function(){
                     .text(item.description)
                     .appendTo(content);
                 $('#events').append(content);
-                setTimeout(function() {window.scrollTo(0, 1);}, 1);
             }
         });
     };
@@ -442,8 +461,6 @@ KIJ2013.Map = function(){
                 marker = $('#marker');
                 initialised = true;
             }
-            KIJ2013.setTitle('Map');
-            KIJ2013.setActionBarUp('Menu');
             if(navigator.geolocation)
             {
                 navigator.geolocation.getCurrentPosition(function(position){
@@ -496,7 +513,219 @@ KIJ2013.Radio = function(){
                 loaded = true;
             }
             KIJ2013.setTitle('Radio');
-            KIJ2013.setActionBarUp('Menu')
+            KIJ2013.setActionBarUp('Menu');
+        }
+    }
+}();
+KIJ2013.Learn = function(){
+    var TABLE_NAME = "learn",
+        baseURL = "learn.php?id=",
+        baseId = 'learn-',
+        highlight,
+    createTable = function() {
+        KIJ2013.db.transaction(function(tx){
+            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
+                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
+                '`date` int, `description` text)');
+        });
+    },
+    onClickLearnItem = function(){
+        displayItem($(this).data('guid'));
+    },
+    displayFoundList = function()
+    {
+        KIJ2013.setActionBarUp('Menu');
+        KIJ2013.setTitle('Learn');
+        KIJ2013.scrollTop();
+        KIJ2013.db.readTransaction(function(tx){
+            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME +
+                '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
+                var len = result.rows.length,
+                    list,
+                    i,
+                    row,
+                    li,
+                    item,
+                    title,
+                    id;
+                if(len)
+                {
+                    list = $('<ul/>').attr('id',"learn-list")
+                        .addClass("listview");
+                    for(i=0;i<len;i++)
+                    {
+                        row = result.rows.item(i);
+                        id = row.guid;
+                        li = $('<li/>').attr('id', baseId+id);
+                        title = row.title || "* New item";
+                        item = $('<a/>').text(title);
+                        item.data('guid', id);
+                        item.click(onClickLearnItem);
+                        if(id == highlight)
+                        {
+                            li.addClass('highlight');
+                            highlight = null;
+                        }
+                        li.append(item);
+                        list.append(li);
+                    }
+                    $('#learn').empty().append(list);
+                }
+            });
+        });
+    },
+    displayItem = function(guid){
+        KIJ2013.setActionBarUp(displayFoundList);
+        KIJ2013.scrollTop();
+        KIJ2013.db.readTransaction(function(tx){
+            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
+                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
+                if(result.rows.length == 1)
+                {
+                    var item = result.rows.item(0),
+                        content = $('<div/>').css({"padding": "10px"});
+                    if(!item.description){
+                        KIJ2013.showLoading();
+                        loadItem(guid, function(){
+                            KIJ2013.hideLoading();
+                            displayItem(guid);
+                        },function(){
+                            KIJ2013.hideLoading();
+                            KIJ2013.showError('Sorry, Could not find any '+
+                                'information on that item.')
+                            displayFoundList();
+                        });
+                    }
+                    else
+                    {
+                        KIJ2013.setTitle(item.title);
+                        $('<h1/>').text(item.title).appendTo(content);
+                        content.append(item.description);
+                        $('#learn').empty().append(content);
+                    }
+                }
+            });
+        });
+    },
+    loadItem = function(id, success, error){
+        $.get(baseURL + id, function(data){
+            KIJ2013.db.transaction(function(tx){
+                tx.executeSql('UPDATE `' + TABLE_NAME +
+                        '` SET `title` = ?, `description` = ? WHERE `guid` = ?',
+                    [data.title, data.description, id]);
+            });
+        })
+        .success(success)
+        .error(error);
+    };
+    return {
+        init: function(){
+            createTable();
+            displayFoundList();
+        },
+        // Mark an item as found by inserting it into the database
+        add: function(id){
+            KIJ2013.db.transaction(function(tx){
+                var date = (new Date())/1000;
+                tx.executeSql('INSERT INTO `' + TABLE_NAME +
+                        '` (`guid`,`date`) VALUES (?, ?)', [id, date]);
+            });
+        },
+        highlight: function(id){
+            var el = $('#'+baseId+id),
+                cl = 'highlight';
+            if(el.length)
+            {
+                el.addClass(cl);
+                setTimeout(function(){
+                    el.removeClass(cl);
+                },3000);
+            }
+            highlight = id;
+        }
+    }
+}();
+KIJ2013.Barcode = function(){
+    var video = $('#live')[0],
+        canvas = $('<canvas>')[0],
+        ctx = canvas.getContext('2d'),
+        localMediaStream = null,
+        snapshot = function (){
+            if(localMediaStream){
+                ctx.drawImage(video,0,0);
+                qrcode.decode(canvas.toDataURL('image/webp'));
+            }
+        },
+        nav = navigator,
+        win = window,
+        createObjectURL,
+        interval,
+        initialised;
+    canvas.width = 640;
+    canvas.height = 480;
+    // Normalise getUserMedia
+    nav.getUserMedia ||
+        (nav.getUserMedia = nav.webkitGetUserMedia);
+    // Normalise window URL
+    win.URL ||
+        (win.URL = win.webkitURL || win.msURL || win.oURL);
+    // Avoid opera quirk
+    createObjectURL = function(stream){
+        return (win.URL && win.URL.createObjectURL) ?
+            win.URL.createObjectURL(stream) : stream;
+    };
+    // Set callback for detection of QR Code
+    qrcode.callback = function (a)
+    {
+        if(a){
+            var id = a.slice(26);
+            if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+            {
+                KIJ2013.Barcode.stop();
+                KIJ2013.Learn.add(id);
+                alert("Congratulations you found an item.");
+                KIJ2013.navigateTo('Learn');
+                KIJ2013.Learn.highlight(id);
+            }
+            else
+                alert(a);
+        }
+    };
+    return {
+        init: function(){
+            if(nav.getUserMedia){
+                if(!initialised){
+                    nav.getUserMedia({video:true},
+                        function(stream) {
+                            // Display Preview
+                            video.src = createObjectURL(stream);
+                            // Keep reference to stream for snapshots
+                            localMediaStream = stream;
+                            initialised = true;
+                            KIJ2013.Barcode.start();
+                        },
+                        function(err) {
+                            console.log("Unable to get video stream!")
+                        }
+                    );
+                }
+                else
+                    KIJ2013.Barcode.start();
+            }
+            else
+                KIJ2013.showError('Barcode Scanner is not available on your '
+                    + 'platform.')
+        },
+        start: function(){
+            video.play();
+            interval = setInterval(snapshot, 1000);
+        },
+        stop: function(){
+            video.pause();
+            clearInterval(interval);
+        },
+        hide: function(){
+            KIJ2013.Barcode.stop();
         }
     }
 }();
@@ -507,6 +736,7 @@ KIJ2013.Debug = function(){
      */
     var TABLE_NEWS = "news",
         TABLE_EVENTS = "events",
+        TABLE_LEARN = "learn",
         initialised = false;
 
     return {
@@ -525,6 +755,12 @@ KIJ2013.Debug = function(){
                         alert("Events Cleared");
                     });
                 });
+                $('#clear-learn').click(function(){
+                    KIJ2013.db.transaction(function(tx){
+                        tx.executeSql('DELETE FROM ' + TABLE_LEARN);
+                        alert("Learn Cleared");
+                    });
+                });
                 $('#set-subcamp').click(function(){
                     var val = $('#subcamp').val();
                     KIJ2013.setPreference("subcamp", val);
@@ -532,8 +768,6 @@ KIJ2013.Debug = function(){
                 });
                 initialised = true;
             }
-            KIJ2013.setTitle('Debug');
-            KIJ2013.setActionBarUp('Menu')
         }
     }
 }();

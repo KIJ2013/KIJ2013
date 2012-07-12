@@ -64,7 +64,15 @@ var KIJ2013 = function(){
                 "(key,value) VALUES (?,?)",[name,value]);
         },
         navigateTo: function(name) {
-            $('section').hide();
+            var sections = $('section:visible'),
+                nm;
+            $.each(sections, function(i,item){
+                nm = $(item).attr('id');
+                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
+                if(KIJ2013[nm] && typeof KIJ2013[nm].hide == "function")
+                    KIJ2013[nm].hide();
+            })
+            sections.hide();
             $('#'+name.toLowerCase()).show();
             KIJ2013.setActionBarUp('Menu');
             KIJ2013.setTitle(name);
@@ -715,6 +723,9 @@ KIJ2013.Barcode = function(){
         stop: function(){
             video.pause();
             clearInterval(interval);
+        },
+        hide: function(){
+            KIJ2013.Barcode.stop();
         }
     }
 }();

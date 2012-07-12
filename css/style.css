@@ -121,7 +121,7 @@ ul.listview li a
 #menu {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/05/Jamboree-TV-Block-Group-Photo-1024x682.jpg);
     background-repeat: no-repeat;
-    background-position: 50%;
+    background-position: 50% 0;
     min-height: 100%
 }
 #menu li {
@@ -191,8 +191,6 @@ button:focus,
 button:active,
 .button.selected,
 .button:active {
-    -webkit-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
-    -moz-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
     background: #4c114c;
 }
@@ -238,7 +236,10 @@ button:active,
 	50% {box-shadow: 0 0 20px 15px black;}
 	100% {box-shadow: 0 0 20px 15px transparent;}
 }
+#barcode {
+    text-align: center;
+}
 video {
-    width: 100%;
-    -webkit-transform: rotate(270deg) translateX(-100px);
+    width: 90%;
+    margin-top: 40px;
 }

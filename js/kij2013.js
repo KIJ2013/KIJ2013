@@ -629,7 +629,9 @@ KIJ2013.Barcode = function(){
         },
         nav = navigator,
         win = window,
-        createObjectURL;
+        createObjectURL,
+        interval,
+        initialised;
     canvas.width = 640;
     canvas.height = 480;
     // Normalise getUserMedia
@@ -646,36 +648,50 @@ KIJ2013.Barcode = function(){
     // Set callback for detection of QR Code
     qrcode.callback = function (a)
     {
-        if(a.slice(0,26) == "http://kij13.org.uk/learn/")
-        {
-            KIJ2013.Learn.add(a.slice(26));
-            alert("Congratulations you found an item.");
-            KIJ2013.navigateTo('Learn');
-        }
-        else if(a){
-            alert(a);
+        if(a){
+            if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+            {
+                KIJ2013.Barcode.stop();
+                KIJ2013.Learn.add(a.slice(26));
+                alert("Congratulations you found an item.");
+                KIJ2013.navigateTo('Learn');
+            }
+            else
+                alert(a);
         }
     };
     return {
         init: function(){
-
             if(nav.getUserMedia){
-                nav.getUserMedia({video:true},
-                    function(stream) {
-                        // Display Preview
-                        video.src = createObjectURL(stream);
-                        // Keep reference to stream for snapshots
-                        localMediaStream = stream;
-                        setInterval(snapshot, 1000);
-                    },
-                    function(err) {
-                        console.log("Unable to get video stream!")
-                    }
-                );
+                if(!initialised){
+                    nav.getUserMedia({video:true},
+                        function(stream) {
+                            // Display Preview
+                            video.src = createObjectURL(stream);
+                            // Keep reference to stream for snapshots
+                            localMediaStream = stream;
+                            initialised = true;
+                            KIJ2013.Barcode.start();
+                        },
+                        function(err) {
+                            console.log("Unable to get video stream!")
+                        }
+                    );
+                }
+                else
+                    KIJ2013.Barcode.start();
             }
             else
                 KIJ2013.showError('Barcode Scanner is not available on your '
                     + 'platform.')
+        },
+        start: function(){
+            video.play();
+            interval = setInterval(snapshot, 1000);
+        },
+        stop: function(){
+            video.pause();
+            clearInterval(interval);
         }
     }
 }();

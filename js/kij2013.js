@@ -120,6 +120,17 @@ var KIJ2013 = function(){
         }
     }
 }();
+KIJ2013.Util = function(){
+    return {
+        sort: function(field, reverse, primer){
+            var key = function (x) {return primer ? primer(x[field]) : x[field]};
+            return function (a,b) {
+                var A = key(a), B = key(b);
+                return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
+            }
+        }
+    }
+}();
 KIJ2013.Menu = function(){
     return {
         init: function(){
@@ -132,13 +143,10 @@ KIJ2013.News = function(){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "news.rss",
         TABLE_NAME = 'news',
+        store,
 
     createDatabase = function() {
-        KIJ2013.db.transaction(function(tx){
-            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
-                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
-                '`date` int, `description` text)');
-        });
+        store = new Lawnchair({name: TABLE_NAME},function(){});
     },
 
     /**
@@ -147,19 +155,15 @@ KIJ2013.News = function(){
     fetchItems = function()
     {
         $.get(rssURL, function(data){
-            KIJ2013.db.transaction(function(tx){
-                $(data).find('item').each(function(i,item){
-                    var guid = $(item).find('guid').text(),
-                        title = $(item).find('title').text(),
-                        date = new Date($(item).find('pubDate').text()),
-                        description = $(item).find('encoded').text();
-                    description = description || $(item).find('description').text();
-                    tx.executeSql('INSERT INTO `' + TABLE_NAME +
-                        '` (`guid`, `title`, `date`, `description`) VALUES (?, ?, ?, ?)',
-                        [guid, title, (date/1000), description]);
-                });
+            var items = [];
+            $(data).find('item').each(function(i,item){
+                items.push({ key: $(item).find('guid').text(),
+                        title: $(item).find('title').text(),
+                        date: (new Date($(item).find('pubDate').text()))/1000,
+                        description: $(item).find('encoded').text() ||
+                            $(item).find('description').text() });
             });
-            displayNewsList();
+            store.batch(items, function(){displayNewsList();});
         },"xml").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Items: '+status);
         });
@@ -176,52 +180,37 @@ KIJ2013.News = function(){
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME + '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
-                var len = result.rows.length,
-                    list,
-                    i,
-                    row,
-                    li,
-                    item;
-                if(len)
-                {
-                    list = $('<ul/>').attr('id',"news-list").addClass("listview");
-                    for(i=0;i<len;i++)
-                    {
-                        row = result.rows.item(i);
-                        li = $('<li/>');
-                        item = $('<a/>').attr('id', row.guid).text(row.title);
-                        item.data('guid', row.guid);
-                        item.click(onClickNewsItem);
-                        li.append(item);
-                        list.append(li);
-                    }
-                    $('#news').empty().append(list);
-                    KIJ2013.hideLoading();
-                }
-                else
-                    KIJ2013.showLoading();
-            });
+        store.all(function(items){
+            if(items.length)
+            {
+                items.sort(KIJ2013.Util.sort('date', false));
+                var list = $('<ul/>').attr('id',"news-list").addClass("listview");
+                $.each(items,function(index,item){
+                    var li, el;
+                    li = $('<li/>');
+                    el = $('<a/>').attr('id', item.key).text(item.title);
+                    el.data('guid', item.key);
+                    el.click(onClickNewsItem);
+                    li.append(el);
+                    list.append(li);
+                });
+                $('#news').empty().append(list);
+                KIJ2013.hideLoading();
+            }
+            else
+                KIJ2013.showLoading();
         });
     },
 
     displayNewsItem = function(guid){
         KIJ2013.setActionBarUp(displayNewsList);
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
-                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
-                if(result.rows.length == 1)
-                {
-                    var item = result.rows.item(0),
-                        content = $('<div/>').css({"padding": "10px"});
-                    KIJ2013.setTitle(item.title);
-                    $('<h1/>').text(item.title).appendTo(content);
-                    content.append(item.description);
-                    $('#news').empty().append(content);
-                    KIJ2013.scrollTop();
-                }
-            });
+        store.get(guid, function(item){
+            var content = $('<div/>').css({"padding": "10px"});
+            KIJ2013.setTitle(item.title);
+            $('<h1/>').text(item.title).appendTo(content);
+            content.append(item.description);
+            $('#news').empty().append(content);
+            KIJ2013.scrollTop();
         });
     };
 

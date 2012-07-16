@@ -440,6 +440,7 @@ KIJ2013.Map = function(){
         };
     return {
         init: function(){
+            var gl = navigator.geolocation;
             if(!initialised){
                 img = $('#map img');
                 if(img.length == 0)
@@ -451,9 +452,9 @@ KIJ2013.Map = function(){
                 marker = $('#marker');
                 initialised = true;
             }
-            if(navigator.geolocation)
+            if(gl)
             {
-                navigator.geolocation.getCurrentPosition(function(position){
+                gl.getCurrentPosition(function(position){
                     var coords = position.coords,
                         lat = coords.latitude,
                         lon = coords.longitude;

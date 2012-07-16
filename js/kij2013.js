@@ -29,7 +29,14 @@ var KIJ2013 = function(){
             $('section').hide();
             $('#menu').show();
             popup = $('#popup');
-            loading = $('#loading')
+            loading = $('#loading');
+            $(window).on('hashchange',function(){
+                var hash = window.location.hash.substring(1) || "Menu";
+                KIJ2013.navigateTo(hash);
+            }).on('popstate', function(event){
+                if(event.state)
+                    KIJ2013.navigateTo(event.state);
+            })
         },
         getPreference: function(name, def){
             return preferences[name] || def || null;
@@ -55,6 +62,8 @@ var KIJ2013 = function(){
             KIJ2013.setTitle(name);
             if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
                 KIJ2013[name].init();
+            window.location.hash = name;
+            history.pushState(name, name, '#'+name);
             KIJ2013.scrollTop();
         },
         setActionBarUp: function(fn)

@@ -185,7 +185,8 @@ KIJ2013.News = function(){
                 items.push({ key: $(item).find('guid').text(),
                         title: $(item).find('title').text(),
                         date: (new Date($(item).find('pubDate').text()))/1000,
-                        description: $(item).find('encoded').text() ||
+                        description:
+                            $(item).find('content\\:encoded, encoded').text() ||
                             $(item).find('description').text() });
             });
             store.batch(items, function(){displayNewsList();});

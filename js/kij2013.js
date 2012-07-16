@@ -1,39 +1,26 @@
 var KIJ2013 = function(){
-    var preferences = {},
+    var preferences = {key:"preferences"},
         TABLE_PREFERENCES = "preferences",
         loading,
         beingLoaded,
-        popup;
+        popup,
+        store;
 
     return {
-        db: null,
         /**
          * Initialise KIJ2013 objects, databases and preferences
          * @param callback Allows a callack to be attached which fires when
          *   preferences have finished loading.
          */
         init: function(callback){
-            if(!window.openDatabase)
-            {
-                $('#body').html('<p>Sorry Support for your device is not ready yet. ' +
-                  'Please try again in the future.</p>');
-                return;
-            }
-            this.db = window.openDatabase("KIJ2013", "1.0", "KIJ2013 Database",
-              256*1024);
-            this.sql('CREATE TABLE IF NOT EXISTS `' + TABLE_PREFERENCES +
-              '` (`key` varchar(255) PRIMARY KEY,`value` varchar(255))');
-            this.sql("SELECT key,value FROM " + TABLE_PREFERENCES, [],
-              function(tx,results){
-                  var i, item;
-                for(i=0;i<results.rows.length;i++)
-                {
-                    item = results.rows.item(i);
-                    preferences[item.key] = item.value;
-                }
-                if(typeof callback == "function"){
-                    callback();
-                }
+            store = Lawnchair({name: TABLE_PREFERENCES}, function(){
+                this.get("preferences", function(pref){
+                    if(pref)
+                        preferences = pref;
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                });
             });
             $('#menu a').each(function(){
                 $(this).click(function(){KIJ2013.navigateTo($(this).text())});
@@ -44,24 +31,14 @@ var KIJ2013 = function(){
             popup = $('#popup');
             loading = $('#loading')
         },
-        sql: function(sql, vars, callback){
-            if(typeof callback == "function")
-                this.db.readTransaction(function(tx){
-                    tx.executeSql(sql,vars,callback);
-                });
-            else
-                this.db.transaction(function(tx){
-                    tx.executeSql(sql,vars);
-                });
-        },
-        getPreference: function(name){
-            return preferences[name];
+        getPreference: function(name, def){
+            return preferences[name] || def || null;
         },
         setPreference: function(name, value)
         {
+            if(name == "key") return;
             preferences[name] = value;
-            this.sql("INSERT OR REPLACE INTO " + TABLE_PREFERENCES +
-                "(key,value) VALUES (?,?)",[name,value]);
+            store.save(preferences);
         },
         navigateTo: function(name) {
             var sections = $('section:visible'),
@@ -143,6 +120,42 @@ var KIJ2013 = function(){
         }
     }
 }();
+KIJ2013.Util = function(){
+    return {
+        filter: function(field, value, condition, primer){
+            var key = function (x) {return primer ? primer(x[field]) : x[field]};
+            value = arguments.length == 2 ? arguments[1] : arguments[2];
+            condition = arguments.length == 2 ? "=" : arguments[1];
+            return function (a) {
+                var A = key(a);
+                return condition == "=" ? A == value :
+                    (condition == ">" ? A > value :
+                        (condition == "<" ? A < value : true)
+                    );
+            }
+        },
+        sort: function(field, reverse, primer){
+            var key = function (x) {return primer ? primer(x[field]) : x[field]};
+            reverse = typeof reverse == "undefined" || reverse;
+            return function (a,b) {
+                var A = key(a), B = key(b);
+                return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
+            }
+        },
+        merge: function(/* variable number of arrays */){
+            var out = [], array, count, len, i, j;
+            for(i = 0, count = arguments.length; i < count; i++){
+                array = arguments[i];
+                for(j = 0, len = array.length; j < len; j++){
+                    if(out.indexOf(array[j]) === -1) {
+                        out.push(array[j]);
+                    }
+                }
+            }
+            return out;
+        }
+    }
+}();
 KIJ2013.Menu = function(){
     return {
         init: function(){
@@ -155,13 +168,10 @@ KIJ2013.News = function(){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "news.rss",
         TABLE_NAME = 'news',
+        store,
 
     createDatabase = function() {
-        KIJ2013.db.transaction(function(tx){
-            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
-                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
-                '`date` int, `description` text)');
-        });
+        store = new Lawnchair({name: TABLE_NAME},function(){});
     },
 
     /**
@@ -170,19 +180,15 @@ KIJ2013.News = function(){
     fetchItems = function()
     {
         $.get(rssURL, function(data){
-            KIJ2013.db.transaction(function(tx){
-                $(data).find('item').each(function(i,item){
-                    var guid = $(item).find('guid').text(),
-                        title = $(item).find('title').text(),
-                        date = new Date($(item).find('pubDate').text()),
-                        description = $(item).find('encoded').text();
-                    description = description || $(item).find('description').text();
-                    tx.executeSql('INSERT INTO `' + TABLE_NAME +
-                        '` (`guid`, `title`, `date`, `description`) VALUES (?, ?, ?, ?)',
-                        [guid, title, (date/1000), description]);
-                });
+            var items = [];
+            $(data).find('item').each(function(i,item){
+                items.push({ key: $(item).find('guid').text(),
+                        title: $(item).find('title').text(),
+                        date: (new Date($(item).find('pubDate').text()))/1000,
+                        description: $(item).find('encoded').text() ||
+                            $(item).find('description').text() });
             });
-            displayNewsList();
+            store.batch(items, function(){displayNewsList();});
         },"xml").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Items: '+status);
         });
@@ -199,52 +205,37 @@ KIJ2013.News = function(){
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME + '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
-                var len = result.rows.length,
-                    list,
-                    i,
-                    row,
-                    li,
-                    item;
-                if(len)
-                {
-                    list = $('<ul/>').attr('id',"news-list").addClass("listview");
-                    for(i=0;i<len;i++)
-                    {
-                        row = result.rows.item(i);
-                        li = $('<li/>');
-                        item = $('<a/>').attr('id', row.guid).text(row.title);
-                        item.data('guid', row.guid);
-                        item.click(onClickNewsItem);
-                        li.append(item);
-                        list.append(li);
-                    }
-                    $('#news').empty().append(list);
-                    KIJ2013.hideLoading();
-                }
-                else
-                    KIJ2013.showLoading();
-            });
+        store.all(function(items){
+            if(items.length)
+            {
+                items.sort(KIJ2013.Util.sort('date', false));
+                var list = $('<ul/>').attr('id',"news-list").addClass("listview");
+                $.each(items,function(index,item){
+                    var li, el;
+                    li = $('<li/>');
+                    el = $('<a/>').attr('id', item.key).text(item.title);
+                    el.data('guid', item.key);
+                    el.click(onClickNewsItem);
+                    li.append(el);
+                    list.append(li);
+                });
+                $('#news').empty().append(list);
+                KIJ2013.hideLoading();
+            }
+            else
+                KIJ2013.showLoading();
         });
     },
 
     displayNewsItem = function(guid){
         KIJ2013.setActionBarUp(displayNewsList);
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
-                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
-                if(result.rows.length == 1)
-                {
-                    var item = result.rows.item(0),
-                        content = $('<div/>').css({"padding": "10px"});
-                    KIJ2013.setTitle(item.title);
-                    $('<h1/>').text(item.title).appendTo(content);
-                    content.append(item.description);
-                    $('#news').empty().append(content);
-                    KIJ2013.scrollTop();
-                }
-            });
+        store.get(guid, function(item){
+            var content = $('<div/>').css({"padding": "10px"});
+            KIJ2013.setTitle(item.title);
+            $('<h1/>').text(item.title).appendTo(content);
+            content.append(item.description);
+            $('#news').empty().append(content);
+            KIJ2013.scrollTop();
         });
     };
 
@@ -264,14 +255,13 @@ KIJ2013.Events = function(){
     //var rssURL = "http://www.kij13.org.uk/category/events/feed/";
     var jsonURL = "events.json",
         TABLE_NAME = "events",
+        store,
 
     /**
      * Create Database
      */
     createDatabase = function () {
-        KIJ2013.sql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
-            '` (`guid` varchar(255) PRIMARY KEY,`title` varchar(255),' +
-            '`date` int,`category` varchar(255),`remind` bool,`description` text)');
+        store = new Lawnchair({name: TABLE_NAME},function(){});
     },
 
     /**
@@ -280,16 +270,19 @@ KIJ2013.Events = function(){
     fetchItems = function()
     {
         $.get(jsonURL, function(data){
-            KIJ2013.db.transaction(function(tx){
-                $(data).each(function(i,item){
-                    tx.executeSql('INSERT INTO `' + TABLE_NAME +
-                        '` (`guid`,`title`,`date`,`category`,`remind`,' +
-                        '`description`) VALUES (?, ?, ?, ?, ?, ?)', [item.guid,
-                        item.title, item.date, item.category, item.remind?1:0,
-                        item.description]);
+            var items = [];
+            $(data).each(function(i,item){
+                store.get(item.guid, function(st_item){
+                    st_item = st_item || {};
+                    items.push({ key: item.guid,
+                        title: item.title,
+                        date: item.date,
+                        category: item.category,
+                        remind: !!st_item.remind || !!item.remind,
+                        description: item.description });
                 });
             });
-            displayEventsList();
+            store.batch(items, function(){displayEventsList();});
         },"json").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Events: '+status);
         });
@@ -305,8 +298,10 @@ KIJ2013.Events = function(){
         var guid = event.data.guid,
             className = "selected",
             remind = $(this).toggleClass(className).hasClass(className);
-        KIJ2013.sql('UPDATE ' + TABLE_NAME + ' SET `remind` = ? ' +
-                'WHERE `guid` = ?', [remind?1:0, guid]);
+        store.get(guid, function(item){
+            item.remind = remind;
+            store.save(item);
+        });
         return false;
     },
 
@@ -315,16 +310,11 @@ KIJ2013.Events = function(){
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('Events');
         var subcamp = KIJ2013.getPreference('subcamp');
-        KIJ2013.sql('SELECT guid,title,date,category,remind FROM `' + TABLE_NAME +
-                '` WHERE `date` > ? AND (`category` = ? OR `category` = "all") ' +
-                'ORDER BY `date` ASC LIMIT 30',
-                [(new Date())/1000,subcamp], function(tx, result){
+        store.all(function(items){
             var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                len = result.rows.length,
                 list,
-                i,
-                row,
+                el,
                 guid,
                 li,
                 item,
@@ -333,37 +323,42 @@ KIJ2013.Events = function(){
                 text,
                 remind,
                 category;
-            if(len)
+            if(items.length)
             {
+                items = items.filter(KIJ2013.Util.filter('date', '>',
+                    (new Date())/1000));
+                if(subcamp)
+                    items = KIJ2013.Util.merge(
+                        items.filter(KIJ2013.Util.filter('category', subcamp)),
+                        items.filter(KIJ2013.Util.filter('category', 'all')));
+                items.sort(KIJ2013.Util.sort('date'));
                 list = $('<ul/>').attr('id', "event-list").addClass("listview");
-                for(i=0;i<len;i++)
-                {
-                    row = result.rows.item(i);
-                    guid = row.guid;
+                $.each(items,function(index,item){
+                    guid = item.key;
                     li = $('<li/>');
-                    item = $('<a/>').attr('id', guid);
-                    date = new Date(row.date*1000);
+                    el = $('<a/>').attr('id', guid);
+                    date = new Date(item.date*1000);
                     datetext = $('<p/>')
                         .addClass('date-text')
                         .text(date.getDate() + " " + month[date.getMonth()]);
                     text = $('<p/>')
                         .addClass('title')
-                        .text(row.title);
+                        .text(item.title);
                     remind = $('<a/>')
                         .addClass('remind-btn button')
-                        .addClass(row.remind ? 'selected' : '')
+                        .addClass(item.remind ? 'selected' : '')
                         .text('Remind')
                         .click({guid:guid},onClickRemind);
                     category = $('<p/>')
                         .addClass('category')
-                        .text(row.category);
-                    item.data('guid', row.guid);
-                    item.click(onClickEventItem);
-                    item.append(datetext).append(text)
+                        .text(item.category);
+                    el.data('guid', guid);
+                    el.click(onClickEventItem);
+                    el.append(datetext).append(text)
                         .append(remind).append(category);
-                    li.append(item);
+                    li.append(el);
                     list.append(li);
-                }
+                });
                 $('#events').empty().append(list);
                 KIJ2013.hideLoading();
             }
@@ -375,15 +370,9 @@ KIJ2013.Events = function(){
     displayEvent = function(guid){
         KIJ2013.setActionBarUp(displayEventsList);
         KIJ2013.scrollTop();
-        var subcamp = KIJ2013.getPreference('subcamp');
-        KIJ2013.sql('SELECT title,date,remind,category,description FROM `' +
-                TABLE_NAME + '` WHERE guid = ? AND ' +
-                '(`category` = ? OR `category` = "all") LIMIT 1', [guid,subcamp],
-                function(tx, result){
-            if(result.rows.length == 1)
-            {
-                var item = result.rows.item(0),
-                    content = $('<div/>').css({"padding": "10px"}),
+        store.get(guid, function(item){
+            if(item){
+                var content = $('<div/>').css({"padding": "10px"}),
                     date = new Date(item.date*1000);
                 KIJ2013.setTitle(item.title)
                 $('#events').empty();
@@ -522,12 +511,13 @@ KIJ2013.Learn = function(){
         baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlight,
-    createTable = function() {
-        KIJ2013.db.transaction(function(tx){
-            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
-                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
-                '`date` int, `description` text)');
-        });
+        store,
+
+    /**
+     * Create Database
+     */
+    createDatabase = function () {
+        store = new Lawnchair({name: TABLE_NAME},function(){});
     },
     onClickLearnItem = function(){
         displayItem($(this).data('guid'));
@@ -537,82 +527,69 @@ KIJ2013.Learn = function(){
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('Learn');
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME +
-                '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
-                var len = result.rows.length,
-                    list,
-                    i,
-                    row,
-                    li,
-                    item,
-                    title,
-                    id;
-                if(len)
-                {
-                    list = $('<ul/>').attr('id',"learn-list")
-                        .addClass("listview");
-                    for(i=0;i<len;i++)
+        store.all(function(items){
+            var len = items.length,
+                list;
+            if(len)
+            {
+                list = $('<ul/>').attr('id',"learn-list")
+                    .addClass("listview");
+                items.sort(KIJ2013.Util.sort("date", false));
+                $.each(items, function(index,item){
+                    var el, li, title, id;
+                    id = item.key;
+                    li = $('<li/>').attr('id', baseId+id);
+                    title = item.title || "* New item";
+                    el = $('<a/>').text(title);
+                    el.data('guid', id);
+                    el.click(onClickLearnItem);
+                    if(id == highlight)
                     {
-                        row = result.rows.item(i);
-                        id = row.guid;
-                        li = $('<li/>').attr('id', baseId+id);
-                        title = row.title || "* New item";
-                        item = $('<a/>').text(title);
-                        item.data('guid', id);
-                        item.click(onClickLearnItem);
-                        if(id == highlight)
-                        {
-                            li.addClass('highlight');
-                            highlight = null;
-                        }
-                        li.append(item);
-                        list.append(li);
+                        li.addClass('highlight');
+                        highlight = null;
                     }
-                    $('#learn').empty().append(list);
-                }
-            });
+                    li.append(el);
+                    list.append(li);
+                });
+                $('#learn').empty().append(list);
+            }
         });
     },
     displayItem = function(guid){
         KIJ2013.setActionBarUp(displayFoundList);
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
-                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
-                if(result.rows.length == 1)
-                {
-                    var item = result.rows.item(0),
-                        content = $('<div/>').css({"padding": "10px"});
-                    if(!item.description){
-                        KIJ2013.showLoading();
-                        loadItem(guid, function(){
-                            KIJ2013.hideLoading();
-                            displayItem(guid);
-                        },function(){
-                            KIJ2013.hideLoading();
-                            KIJ2013.showError('Sorry, Could not find any '+
-                                'information on that item.')
-                            displayFoundList();
-                        });
-                    }
-                    else
-                    {
-                        KIJ2013.setTitle(item.title);
-                        $('<h1/>').text(item.title).appendTo(content);
-                        content.append(item.description);
-                        $('#learn').empty().append(content);
-                    }
+        store.get(guid, function(item){
+            if(item)
+            {
+                var content = $('<div/>').css({"padding": "10px"});
+                if(!item.description){
+                    KIJ2013.showLoading();
+                    loadItem(guid, function(){
+                        KIJ2013.hideLoading();
+                        displayItem(guid);
+                    },function(){
+                        KIJ2013.hideLoading();
+                        KIJ2013.showError('Sorry, Could not find any '+
+                            'information on that item.')
+                        displayFoundList();
+                    });
                 }
-            });
+                else
+                {
+                    KIJ2013.setTitle(item.title);
+                    $('<h1/>').text(item.title).appendTo(content);
+                    content.append(item.description);
+                    $('#learn').empty().append(content);
+                }
+            }
         });
     },
     loadItem = function(id, success, error){
         $.get(baseURL + id, function(data){
-            KIJ2013.db.transaction(function(tx){
-                tx.executeSql('UPDATE `' + TABLE_NAME +
-                        '` SET `title` = ?, `description` = ? WHERE `guid` = ?',
-                    [data.title, data.description, id]);
+            store.get(id, function(item){
+                item.title = data.title;
+                item.description = data.description;
+                store.save(item);
             });
         })
         .success(success)
@@ -620,15 +597,17 @@ KIJ2013.Learn = function(){
     };
     return {
         init: function(){
-            createTable();
+            createDatabase();
             displayFoundList();
         },
         // Mark an item as found by inserting it into the database
         add: function(id){
-            KIJ2013.db.transaction(function(tx){
-                var date = (new Date())/1000;
-                tx.executeSql('INSERT INTO `' + TABLE_NAME +
-                        '` (`guid`,`date`) VALUES (?, ?)', [id, date]);
+            if(!store)
+                createDatabase();
+            store.get(id, function(item){
+                if(!item)
+                    store.save({ key: id,
+                        date: (new Date())/1000 });
             });
         },
         highlight: function(id){
@@ -641,7 +620,8 @@ KIJ2013.Learn = function(){
                     el.removeClass(cl);
                 },3000);
             }
-            highlight = id;
+            else
+                highlight = id;
         }
     }
 }();
@@ -737,6 +717,7 @@ KIJ2013.Debug = function(){
     var TABLE_NEWS = "news",
         TABLE_EVENTS = "events",
         TABLE_LEARN = "learn",
+        TABLE_PREFS = "preferences",
         initialised = false;
 
     return {
@@ -744,21 +725,27 @@ KIJ2013.Debug = function(){
             if(!initialised){
                 $('#subcamp').val(KIJ2013.getPreference('subcamp'));
                 $('#clear-news').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_NEWS);
+                    Lawnchair({name: TABLE_NEWS}, function(){
+                        this.nuke();
                         alert("News Items Cleared");
                     });
                 });
                 $('#clear-events').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_EVENTS);
+                    Lawnchair({name: TABLE_EVENTS}, function(){
+                        this.nuke();
                         alert("Events Cleared");
                     });
                 });
                 $('#clear-learn').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_LEARN);
+                    Lawnchair({name: TABLE_LEARN}, function(){
+                        this.nuke();
                         alert("Learn Cleared");
+                    });
+                });
+                $('#clear-preferences').click(function(){
+                    Lawnchair({name: TABLE_PREFS}, function(){
+                        this.nuke();
+                        alert("Preferences Cleared");
                     });
                 });
                 $('#set-subcamp').click(function(){

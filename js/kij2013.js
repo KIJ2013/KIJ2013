@@ -700,6 +700,8 @@ KIJ2013.Barcode = function(){
         },
         start: function(){
             video.play();
+            if(interval)
+                clearInterval(interval);
             interval = setInterval(snapshot, 1000);
         },
         stop: function(){

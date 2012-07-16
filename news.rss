@@ -13,11 +13,28 @@
 	<atom:link href="http://www.kij13.org.uk/category/latest-news/feed/" rel="self" type="application/rss+xml" />
 	<link>http://www.kij13.org.uk</link>
 	<description></description>
-	<lastBuildDate>Thu, 31 May 2012 23:43:21 +0000</lastBuildDate>
+	<lastBuildDate>Sun, 08 Jul 2012 21:59:42 +0000</lastBuildDate>
 	<language>en</language>
 	<sy:updatePeriod>hourly</sy:updatePeriod>
 	<sy:updateFrequency>1</sy:updateFrequency>
 	<generator>http://wordpress.org/?v=3.3.2</generator>
+		<item>
+		<title>Have you got Altitude?</title>
+		<link>http://www.kij13.org.uk/latest-news/have-you-got-altitude/</link>
+		<comments>http://www.kij13.org.uk/latest-news/have-you-got-altitude/#comments</comments>
+		<pubDate>Sun, 08 Jul 2012 21:58:57 +0000</pubDate>
+		<dc:creator>Christopher (Media)</dc:creator>
+				<category><![CDATA[Latest news]]></category>
+
+		<guid isPermaLink="false">http://www.kij13.org.uk/?p=647</guid>
+		<description><![CDATA[Some exciting news! We now have the name of our magazine for KIJ! Here is &#8230; <a href="http://www.kij13.org.uk/latest-news/have-you-got-altitude/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+			<content:encoded><![CDATA[<p>Some exciting news! We now have the name of our magazine for KIJ!</p>
+<p>Here is a sneak peek!</p>
+<p><a href="http://www.kij13.org.uk/wp-content/uploads/2012/07/altitude.png"><img class="alignnone size-medium wp-image-648" title="altitude" src="http://www.kij13.org.uk/wp-content/uploads/2012/07/altitude-300x84.png" alt="" width="300" height="84" /></a></p>
+]]></content:encoded>
+			<wfw:commentRss>http://www.kij13.org.uk/latest-news/have-you-got-altitude/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		</item>
 		<item>
 		<title>Booking System Live and Kicking!</title>
 		<link>http://www.kij13.org.uk/latest-news/booking-system-live-and-kicking/</link>
@@ -169,26 +186,11 @@
 				<category><![CDATA[Latest news]]></category>
 
 		<guid isPermaLink="false">http://www.kij13.org.uk/?p=146</guid>
-		<description><![CDATA[If you book and pay before December 31st 2012, you will receive a Â£10.00 discount &#8230; <a href="http://www.kij13.org.uk/latest-news/early-bird-pricing-announced/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
-			<content:encoded><![CDATA[<p>If you book and pay before December 31st 2012, you will receive a Â£10.00 discount on both participant and adult ticket prices.</p>
+		<description><![CDATA[If you book and pay before December 31st 2012, you will receive a £10.00 discount &#8230; <a href="http://www.kij13.org.uk/latest-news/early-bird-pricing-announced/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+			<content:encoded><![CDATA[<p>If you book and pay before December 31st 2012, you will receive a £10.00 discount on both participant and adult ticket prices.</p>
 <p><a title="Register your interest for KIJ2013" href="http://www.kij13.org.uk/register/">Register your interest today</a> and we will inform you when booking on-line becomes available.</p>
 ]]></content:encoded>
 			<wfw:commentRss>http://www.kij13.org.uk/latest-news/early-bird-pricing-announced/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>KIJ 2009 now over</title>
-		<link>http://www.kij13.org.uk/latest-news/hello-world/</link>
-		<comments>http://www.kij13.org.uk/latest-news/hello-world/#comments</comments>
-		<pubDate>Fri, 11 Feb 2011 17:30:08 +0000</pubDate>
-		<dc:creator>KIJ2013</dc:creator>
-				<category><![CDATA[Latest news]]></category>
-
-		<guid isPermaLink="false">http://www.kij13.org.uk/?p=1</guid>
-		<description><![CDATA[KIJ&#8217;09 is now over! We hope that you enjoyed your KIJ experience! Why not let &#8230; <a href="http://www.kij13.org.uk/latest-news/hello-world/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
-			<content:encoded><![CDATA[<p>KIJ&#8217;09 is now over! We hope that you enjoyed your KIJ experience! Why not let us know what you thought using the <a href="http://www.kij09.org.uk/sform-contact_us-feedback.html">feedback form</a>!</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.kij13.org.uk/latest-news/hello-world/feed/</wfw:commentRss>
 		<slash:comments>0</slash:comments>
 		</item>
 	</channel>

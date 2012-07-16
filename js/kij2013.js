@@ -511,12 +511,13 @@ KIJ2013.Learn = function(){
         baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlight,
-    createTable = function() {
-        KIJ2013.db.transaction(function(tx){
-            tx.executeSql('CREATE TABLE IF NOT EXISTS `' + TABLE_NAME +
-                '` (`guid` varchar(255) PRIMARY KEY, `title` varchar(255),' +
-                '`date` int, `description` text)');
-        });
+        store,
+
+    /**
+     * Create Database
+     */
+    createDatabase = function () {
+        store = new Lawnchair({name: TABLE_NAME},function(){});
     },
     onClickLearnItem = function(){
         displayItem($(this).data('guid'));
@@ -526,82 +527,69 @@ KIJ2013.Learn = function(){
         KIJ2013.setActionBarUp('Menu');
         KIJ2013.setTitle('Learn');
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT guid,title FROM `' + TABLE_NAME +
-                '` ORDER BY `date` DESC LIMIT 30', [], function(tx, result){
-                var len = result.rows.length,
-                    list,
-                    i,
-                    row,
-                    li,
-                    item,
-                    title,
-                    id;
-                if(len)
-                {
-                    list = $('<ul/>').attr('id',"learn-list")
-                        .addClass("listview");
-                    for(i=0;i<len;i++)
+        store.all(function(items){
+            var len = items.length,
+                list;
+            if(len)
+            {
+                list = $('<ul/>').attr('id',"learn-list")
+                    .addClass("listview");
+                items.sort(KIJ2013.Util.sort("date", false));
+                $.each(items, function(index,item){
+                    var el, li, title, id;
+                    id = item.key;
+                    li = $('<li/>').attr('id', baseId+id);
+                    title = item.title || "* New item";
+                    el = $('<a/>').text(title);
+                    el.data('guid', id);
+                    el.click(onClickLearnItem);
+                    if(id == highlight)
                     {
-                        row = result.rows.item(i);
-                        id = row.guid;
-                        li = $('<li/>').attr('id', baseId+id);
-                        title = row.title || "* New item";
-                        item = $('<a/>').text(title);
-                        item.data('guid', id);
-                        item.click(onClickLearnItem);
-                        if(id == highlight)
-                        {
-                            li.addClass('highlight');
-                            highlight = null;
-                        }
-                        li.append(item);
-                        list.append(li);
+                        li.addClass('highlight');
+                        highlight = null;
                     }
-                    $('#learn').empty().append(list);
-                }
-            });
+                    li.append(el);
+                    list.append(li);
+                });
+                $('#learn').empty().append(list);
+            }
         });
     },
     displayItem = function(guid){
         KIJ2013.setActionBarUp(displayFoundList);
         KIJ2013.scrollTop();
-        KIJ2013.db.readTransaction(function(tx){
-            tx.executeSql('SELECT title,date,description FROM `' + TABLE_NAME +
-                '` WHERE guid = ? LIMIT 1', [guid], function(tx, result){
-                if(result.rows.length == 1)
-                {
-                    var item = result.rows.item(0),
-                        content = $('<div/>').css({"padding": "10px"});
-                    if(!item.description){
-                        KIJ2013.showLoading();
-                        loadItem(guid, function(){
-                            KIJ2013.hideLoading();
-                            displayItem(guid);
-                        },function(){
-                            KIJ2013.hideLoading();
-                            KIJ2013.showError('Sorry, Could not find any '+
-                                'information on that item.')
-                            displayFoundList();
-                        });
-                    }
-                    else
-                    {
-                        KIJ2013.setTitle(item.title);
-                        $('<h1/>').text(item.title).appendTo(content);
-                        content.append(item.description);
-                        $('#learn').empty().append(content);
-                    }
+        store.get(guid, function(item){
+            if(item)
+            {
+                var content = $('<div/>').css({"padding": "10px"});
+                if(!item.description){
+                    KIJ2013.showLoading();
+                    loadItem(guid, function(){
+                        KIJ2013.hideLoading();
+                        displayItem(guid);
+                    },function(){
+                        KIJ2013.hideLoading();
+                        KIJ2013.showError('Sorry, Could not find any '+
+                            'information on that item.')
+                        displayFoundList();
+                    });
                 }
-            });
+                else
+                {
+                    KIJ2013.setTitle(item.title);
+                    $('<h1/>').text(item.title).appendTo(content);
+                    content.append(item.description);
+                    $('#learn').empty().append(content);
+                }
+            }
         });
     },
     loadItem = function(id, success, error){
         $.get(baseURL + id, function(data){
-            KIJ2013.db.transaction(function(tx){
-                tx.executeSql('UPDATE `' + TABLE_NAME +
-                        '` SET `title` = ?, `description` = ? WHERE `guid` = ?',
-                    [data.title, data.description, id]);
+            store.get(id, function(item){
+                item.title = data.title;
+                item.description = data.description;
+                store.save(item);
             });
         })
         .success(success)
@@ -609,15 +597,17 @@ KIJ2013.Learn = function(){
     };
     return {
         init: function(){
-            createTable();
+            createDatabase();
             displayFoundList();
         },
         // Mark an item as found by inserting it into the database
         add: function(id){
-            KIJ2013.db.transaction(function(tx){
-                var date = (new Date())/1000;
-                tx.executeSql('INSERT INTO `' + TABLE_NAME +
-                        '` (`guid`,`date`) VALUES (?, ?)', [id, date]);
+            if(!store)
+                createDatabase();
+            store.get(id, function(item){
+                if(!item)
+                    store.save({ key: id,
+                        date: (new Date())/1000 });
             });
         },
         highlight: function(id){
@@ -630,7 +620,8 @@ KIJ2013.Learn = function(){
                     el.removeClass(cl);
                 },3000);
             }
-            highlight = id;
+            else
+                highlight = id;
         }
     }
 }();

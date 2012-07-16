@@ -717,6 +717,7 @@ KIJ2013.Debug = function(){
     var TABLE_NEWS = "news",
         TABLE_EVENTS = "events",
         TABLE_LEARN = "learn",
+        TABLE_PREFS = "preferences",
         initialised = false;
 
     return {
@@ -724,21 +725,27 @@ KIJ2013.Debug = function(){
             if(!initialised){
                 $('#subcamp').val(KIJ2013.getPreference('subcamp'));
                 $('#clear-news').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_NEWS);
+                    Lawnchair({name: TABLE_NEWS}, function(){
+                        this.nuke();
                         alert("News Items Cleared");
                     });
                 });
                 $('#clear-events').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_EVENTS);
+                    Lawnchair({name: TABLE_EVENTS}, function(){
+                        this.nuke();
                         alert("Events Cleared");
                     });
                 });
                 $('#clear-learn').click(function(){
-                    KIJ2013.db.transaction(function(tx){
-                        tx.executeSql('DELETE FROM ' + TABLE_LEARN);
+                    Lawnchair({name: TABLE_LEARN}, function(){
+                        this.nuke();
                         alert("Learn Cleared");
+                    });
+                });
+                $('#clear-preferences').click(function(){
+                    Lawnchair({name: TABLE_PREFS}, function(){
+                        this.nuke();
+                        alert("Preferences Cleared");
                     });
                 });
                 $('#set-subcamp').click(function(){

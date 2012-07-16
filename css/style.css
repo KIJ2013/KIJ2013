@@ -4,7 +4,7 @@ html, body
     margin: 0 auto;
     position: relative;
 }
-body 
+body
 {
     background-color: #ffcc33;
     background-repeat: no-repeat;
@@ -20,6 +20,7 @@ ul {
 }
 ul.listview {
     margin: 0;
+    padding-top: 10px;
 }
 ul.listview li {
     border-bottom: 1px solid #333;
@@ -120,8 +121,8 @@ ul.listview li a
 #menu {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/05/Jamboree-TV-Block-Group-Photo-1024x682.jpg);
     background-repeat: no-repeat;
-    background-position: 50%;
-    height: 100%
+    background-position: 50% 0;
+    min-height: 100%
 }
 #menu li {
     display: inline-block;
@@ -173,19 +174,11 @@ button,
     font-size: 10pt;
     font-weight: normal;
     padding: 5px 10px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
+    border-radius: 4px;
     border: solid 1px #210621;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
-    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
-    -webkit-transition-duration: 0.2s;
-    -moz-transition-duration: 0.2s;
     transition-duration: 0.2s;
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select:none;
     user-select:none;
 }
 
@@ -198,8 +191,6 @@ button:focus,
 button:active,
 .button.selected,
 .button:active {
-    -webkit-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
-    -moz-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
     background: #4c114c;
 }
@@ -225,4 +216,30 @@ button:active,
     height: 38px;
     position: absolute;
     width: 24px;
+}
+#radio {
+    text-align: center;
+}
+#controls .button {
+    display: inline-block;
+}
+#learn .intro {
+    padding-top: 10px;
+    text-align: center;
+}
+#learn-list .highlight {
+	animation: highlight 3s;
+}
+@keyframes highlight {
+	0% {box-shadow: 0 0 20px 15px transparent;}
+	10% {box-shadow: 0 0 20px 15px black;}
+	50% {box-shadow: 0 0 20px 15px black;}
+	100% {box-shadow: 0 0 20px 15px transparent;}
+}
+#barcode {
+    text-align: center;
+}
+video {
+    width: 90%;
+    margin-top: 40px;
 }

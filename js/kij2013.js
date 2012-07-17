@@ -29,7 +29,7 @@ var KIJ2013 = function(){
             $('section').hide();
             $('#menu').show();
             popup = $('#popup');
-            loading = $('#loading')
+            loading = $('#loading');
         },
         getPreference: function(name, def){
             return preferences[name] || def || null;
@@ -166,7 +166,7 @@ KIJ2013.Menu = function(){
 }();
 KIJ2013.News = function(){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
-    var rssURL = "news.rss",
+    var rssURL = "feed.php?f=news.rss",
         TABLE_NAME = 'news',
         store,
 
@@ -318,7 +318,6 @@ KIJ2013.Events = function(){
                 el,
                 guid,
                 li,
-                item,
                 date,
                 datetext,
                 text,

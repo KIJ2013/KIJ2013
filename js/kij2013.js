@@ -631,14 +631,15 @@ KIJ2013.Barcode = function(){
         canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
         localMediaStream = null,
-        snapshot = function (){
-            if(localMediaStream){
-                ctx.drawImage(video,0,0);
-                qrcode.decode(canvas.toDataURL('image/webp'));
-            }
-        },
         nav = navigator,
         win = window,
+        qr = typeof qrcode !== "undefined" ? qrcode : false,
+        snapshot = function (){
+            if(localMediaStream && qr){
+                ctx.drawImage(video,0,0);
+                qr.decode(canvas.toDataURL('image/webp'));
+            }
+        },
         createObjectURL,
         interval,
         initialised;
@@ -655,23 +656,25 @@ KIJ2013.Barcode = function(){
         return (win.URL && win.URL.createObjectURL) ?
             win.URL.createObjectURL(stream) : stream;
     };
-    // Set callback for detection of QR Code
-    qrcode.callback = function (a)
-    {
-        if(a){
-            var id = a.slice(26);
-            if(a.slice(0,26) == "http://kij13.org.uk/learn/")
-            {
-                KIJ2013.Barcode.stop();
-                KIJ2013.Learn.add(id);
-                alert("Congratulations you found an item.");
-                KIJ2013.navigateTo('Learn');
-                KIJ2013.Learn.highlight(id);
+    if(qr){
+        // Set callback for detection of QR Code
+        qr.callback = function (a)
+        {
+            if(a){
+                var id = a.slice(26);
+                if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+                {
+                    KIJ2013.Barcode.stop();
+                    KIJ2013.Learn.add(id);
+                    alert("Congratulations you found an item.");
+                    KIJ2013.navigateTo('Learn');
+                    KIJ2013.Learn.highlight(id);
+                }
+                else
+                    alert(a);
             }
-            else
-                alert(a);
-        }
-    };
+        };
+    }
     return {
         init: function(){
             if(nav.getUserMedia){

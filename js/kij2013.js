@@ -446,7 +446,11 @@ KIJ2013.Map = function(){
                 {
                     KIJ2013.showLoading();
                     img = $('<img />').attr('src', "img/map.png")
-                        .appendTo('#map').load(KIJ2013.hideLoading);
+                        .appendTo('#map').load(
+                        function(){
+                            KIJ2013.Map.moveTo(51.3015, 0.584);
+                            KIJ2013.hideLoading();
+                        });
                 }
                 marker = $('#marker');
                 initialised = true;
@@ -465,7 +469,12 @@ KIJ2013.Map = function(){
         moveTo: function(lat, lon)
         {
             try {
-                window.scrollTo(lonToX(lon), latToY(lat));
+                var win = $(window),
+                    height = win.height(),
+                    width = win.width(),
+                    x = lonToX(lon) - width / 2,
+                    y = img_size[1] - latToY(lat) - height / 2;
+                setTimeout(function(){window.scrollTo(x, y);},10);
             }
             catch (e){}
         },

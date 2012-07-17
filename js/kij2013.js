@@ -715,7 +715,7 @@ KIJ2013.Barcode = function(){
         }
     }
 }();
-KIJ2013.Debug = function(){
+KIJ2013.Settings = function(){
 
     /**
      * PRIVATE Variables
@@ -724,40 +724,42 @@ KIJ2013.Debug = function(){
         TABLE_EVENTS = "events",
         TABLE_LEARN = "learn",
         TABLE_PREFS = "preferences",
+        subcamp_el,
         initialised = false;
 
     return {
         init: function() {
             if(!initialised){
-                $('#subcamp').val(KIJ2013.getPreference('subcamp'));
-                $('#clear-news').click(function(){
+                subcamp_el = $('#subcamp');
+                subcamp_el.val(KIJ2013.getPreference('subcamp'))
+                subcamp_el.change(function(){
+                    var val = subcamp_el.val();
+                    KIJ2013.setPreference("subcamp", val);
+                });
+                $('#clear-cache').click(function(){
+                    var all_done = 0;
                     Lawnchair({name: TABLE_NEWS}, function(){
                         this.nuke();
-                        alert("News Items Cleared");
+                        if(++all_done == 3)
+                            alert("Cache Cleared");
                     });
-                });
-                $('#clear-events').click(function(){
                     Lawnchair({name: TABLE_EVENTS}, function(){
                         this.nuke();
-                        alert("Events Cleared");
+                        if(++all_done == 3)
+                            alert("Cache Cleared");
                     });
-                });
-                $('#clear-learn').click(function(){
                     Lawnchair({name: TABLE_LEARN}, function(){
                         this.nuke();
-                        alert("Learn Cleared");
+                        if(++all_done == 3)
+                            alert("Cache Cleared");
                     });
                 });
                 $('#clear-preferences').click(function(){
                     Lawnchair({name: TABLE_PREFS}, function(){
                         this.nuke();
+                        subcamp_el.val('');
                         alert("Preferences Cleared");
                     });
-                });
-                $('#set-subcamp').click(function(){
-                    var val = $('#subcamp').val();
-                    KIJ2013.setPreference("subcamp", val);
-                    alert("'subcamp' set to '" + val + "'");
                 });
                 initialised = true;
             }

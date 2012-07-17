@@ -9,21 +9,21 @@
     "guid": "2",
     "title": "Campfire",
     "date": "1375038000",
-    "category": "subcampa",
+    "category": "all",
     "remind": false,
     "description": ""
 },{
     "guid": "3",
     "title": "Water Activities",
     "date": "1375174800",
-    "category": "subcampb",
+    "category": "beta",
     "remind": false,
     "description": ""
 },{
     "guid": "4",
     "title": "JOTA / JOTI",
     "date": "1375347600",
-    "category": "all",
+    "category": "gamma",
     "remind": false,
     "description": ""
 },{

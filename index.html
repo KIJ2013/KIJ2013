@@ -24,7 +24,7 @@
                 <li><a><img src="img/ic_radio.png" /><br>Radio</a></li>
                 <li><a><img src="img/ic_learn.png" /><br>Learn</a></li>
                 <li><a><img src="img/ic_barcode.png" /><br>Barcode</a></li>
-                <li><a><img src="img/ic_debug.png" /><br>Debug</a></li>
+                <li><a><img src="img/ic_debug.png" /><br>Settings</a></li>
             </ul>
         </section>
         <section id="news"></section>
@@ -51,18 +51,24 @@
         <section id="barcode">
             <video id="live" autoplay></video>
         </section>
-        <section id="debug">
+        <section id="settings">
+            <h1>Sub-Camp</h1>
             <p>
-                <button id="clear-news">Clear News</button>
-                <button id="clear-events">Clear Events</button>
-                <button id="clear-learn">Clear Learn</button>
-                <button id="clear-preferences">Clear Preferences</button><br/>
+                <select id="subcamp">
+                    <option>
+                    <option>alpha
+                    <option>beta
+                    <option>gamma
+                    <option>delta
+                </select>
+                <label for="subcamp">Set your sub-camp for a personalised
+                    experience</label>
             </p>
-            <p>
-                <label for="subcamp">Sub-Camp:</label>
-                <input id="subcamp" />
-                <button id="set-subcamp">Set Sub-Camp</button>
-            </p>
+            <h1>Data</h1>
+            <button id="clear-preferences">Clear Preferences</button>
+            <p>You can delete your preferences including sub-camp.</p>
+            <button id="clear-cache">Clear Cache</button>
+            <p>You can also clear saved data which has been downloaded</p>
         </section>
         <div id="loading">
             Loading<br>

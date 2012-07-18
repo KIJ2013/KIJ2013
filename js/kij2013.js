@@ -455,6 +455,8 @@ KIJ2013.Map = function(){
                 marker = $('#marker');
                 initialised = true;
             }
+            else
+                KIJ2013.Map.moveTo(51.3015, 0.584);
             if(gl)
             {
                 gl.getCurrentPosition(function(position){

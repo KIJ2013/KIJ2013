@@ -4,7 +4,8 @@ var KIJ2013 = function(){
         loading,
         beingLoaded,
         popup,
-        store;
+        store,
+        sections = ["news","events","map","radio","learn","barcode","settings"];
 
     return {
         /**
@@ -22,10 +23,15 @@ var KIJ2013 = function(){
                     }
                 });
             });
-            $('#menu li').each(function(){
-                $(this).click(function(){KIJ2013.navigateTo($(this).text())});
-            });
             KIJ2013.setActionBarUp();
+            var i = 0,
+                select = $('#action_bar select');
+            select.empty();
+            for(;i < sections.length; i++)
+                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+            select.change(function(){
+                KIJ2013.navigateTo($(this).val());
+            });
             $('#action_bar').show();
             $('section').hide();
             KIJ2013.navigateTo("News")
@@ -52,7 +58,6 @@ var KIJ2013 = function(){
             })
             sections.hide();
             $('#'+name.toLowerCase()).show();
-            KIJ2013.setActionBarUp('Menu');
             KIJ2013.setTitle(name);
             if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
                 KIJ2013[name].init();
@@ -66,7 +71,7 @@ var KIJ2013 = function(){
                     fn();
                     return false;
                 });
-                $('#up-icon').css({'visibilty': 'normal'});
+                $('#up-icon').css({'visibility': 'visible'});
             }
             else if(typeof fn == "string")
             {
@@ -99,7 +104,8 @@ var KIJ2013 = function(){
             loading.show();
         },
         hideLoading: function(){
-            loading.hide();
+            if(loading)
+                loading.hide();
             if(beingLoaded){
                 beingLoaded.show();
                 beingLoaded = null;
@@ -190,7 +196,9 @@ KIJ2013.News = function(){
                             $(item).find('content\\:encoded, encoded').text() ||
                             $(item).find('description').text() });
             });
-            store.batch(items, function(){displayNewsList();});
+            store.batch(items, function(){
+                displayNewsList();
+            });
         },"xml").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Items: '+status);
         });
@@ -204,7 +212,7 @@ KIJ2013.News = function(){
 
     displayNewsList = function()
     {
-        KIJ2013.setActionBarUp('Menu');
+        KIJ2013.setActionBarUp();
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
         store.all(function(items){
@@ -244,8 +252,8 @@ KIJ2013.News = function(){
     return {
         init: function(){
             createDatabase();
-            displayNewsList();
             fetchItems();
+            displayNewsList();
         }
     }
 }();
@@ -272,17 +280,20 @@ KIJ2013.Events = function(){
     fetchItems = function()
     {
         $.get(jsonURL, function(data){
-            var items = [];
-            $(data).each(function(i,item){
-                store.get(item.guid, function(st_item){
-                    st_item = st_item || {};
-                    items.push({ key: item.guid,
-                        title: item.title,
-                        date: item.date,
-                        category: item.category,
-                        remind: !!st_item.remind || !!item.remind,
-                        description: item.description });
+            var items = [],
+                item;
+            $(data).each(function(i,jitem){
+                item = { key: jitem.guid,
+                    title: jitem.title,
+                    date: jitem.date,
+                    category: jitem.category,
+                    remind: !!jitem.remind,
+                    description: jitem.description };
+                store.get(jitem.guid, function(st_item){
+                    if(st_item)
+                        item.remind = st_item.remind;
                 });
+                items.push(item);
             });
             store.batch(items, function(){displayEventsList();});
         },"json").error(function(jqXHR,status,error){
@@ -309,7 +320,7 @@ KIJ2013.Events = function(){
 
     displayEventsList = function()
     {
-        KIJ2013.setActionBarUp('Menu');
+        KIJ2013.setActionBarUp();
         KIJ2013.setTitle('Events');
         var subcamp = KIJ2013.getPreference('subcamp');
         store.all(function(items){
@@ -515,7 +526,6 @@ KIJ2013.Radio = function(){
                 loaded = true;
             }
             KIJ2013.setTitle('Radio');
-            KIJ2013.setActionBarUp('Menu');
         }
     }
 }();
@@ -537,7 +547,7 @@ KIJ2013.Learn = function(){
     },
     displayFoundList = function()
     {
-        KIJ2013.setActionBarUp('Menu');
+        KIJ2013.setActionBarUp();
         KIJ2013.setTitle('Learn');
         KIJ2013.scrollTop();
         store.all(function(items){

@@ -101,6 +101,31 @@ ul.listview li a
     vertical-align: middle;
     font-size: 16px;
 }
+#action_bar select {
+    -webkit-appearance: none;
+    background-color: #DDD;
+    background-image: url(../img/select_arrow.png);
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    border: 0;
+    border-radius: 0;
+    color: #333;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    height: 24px;
+    margin: 14px 4px;
+    padding-right: 10px;
+}
+#action_bar option {
+    background-color: white;
+    font-weight: normal;
+    padding: 5px 15px;
+    border-bottom: 1px solid #999;
+}
+#action_bar option:last-child {
+    border: 0;
+}
 #loading {
     display: none;
     font-size: 2em;

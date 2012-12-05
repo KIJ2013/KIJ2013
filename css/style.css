@@ -145,12 +145,11 @@ ul.listview li a
     margin-top: 10px;
     padding: 10px 0;
     border: 1px solid #B91;
+    cursor: pointer;
+    font-size: 32px;
 }
 #news-list li {
     line-height: 48px;
-}
-#event-list li > a {
-    position: relative;
 }
 #event-list p {
     margin: 0;

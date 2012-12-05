@@ -22,7 +22,7 @@ var KIJ2013 = function(){
                     }
                 });
             });
-            $('#menu a').each(function(){
+            $('#menu li').each(function(){
                 $(this).click(function(){KIJ2013.navigateTo($(this).text())});
             });
             KIJ2013.setActionBarUp();

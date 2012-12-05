@@ -26,8 +26,9 @@ var KIJ2013 = function(){
                 $(this).click(function(){KIJ2013.navigateTo($(this).text())});
             });
             KIJ2013.setActionBarUp();
+            $('#action_bar').show();
             $('section').hide();
-            $('#menu').show();
+            KIJ2013.navigateTo("News")
             popup = $('#popup');
             loading = $('#loading');
         },
@@ -777,4 +778,7 @@ KIJ2013.Settings = function(){
         }
     }
 }();
-KIJ2013.init();
+$(function(){
+    KIJ2013.News.init();
+    setTimeout(KIJ2013.init,1500);
+});

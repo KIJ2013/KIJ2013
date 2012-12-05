@@ -11,11 +11,13 @@ body
     background-position: 100% 100%;
     font-family: sans-serif;
 }
-
+section {
+    display: none;
+}
 ul {
     list-style: none;
     padding: 0;
-    margin: 10px;
+    margin: 0 10px;
     font-size: 2.5em;
 }
 ul.listview {
@@ -52,8 +54,7 @@ ul.listview li a
     white-space: nowrap;
 }
 #body {
-    margin-top: 48px;
-    height: 100%;
+    padding-top: 48px;
 }
 #header_image {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/02/kij2009opening.jpg);
@@ -66,6 +67,7 @@ ul.listview li a
     background-color: #DDD;
     border-bottom: 1px solid #A9A9A9;
     box-shadow: 0 0 10px 3px black;
+    display: none;
     height: 48px;
     left: 0;
     overflow: hidden;
@@ -118,6 +120,14 @@ ul.listview li a
     text-align: center;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+}
+#splash {
+    display: block;
+    line-height: 384px;
+    text-align: center;
+}
+#splash img {
+    vertical-align: middle;
 }
 #menu {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/05/Jamboree-TV-Block-Group-Photo-1024x682.jpg);

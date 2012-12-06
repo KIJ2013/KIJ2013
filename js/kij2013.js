@@ -346,7 +346,7 @@ KIJ2013.Events = function(){
     onClickRemind = function(event)
     {
         var guid = event.data.guid,
-            className = "selected",
+            className = "active btn-success",
             remind = $(this).toggleClass(className).hasClass(className);
         store.get(guid, function(item){
             item.remind = remind;
@@ -394,8 +394,8 @@ KIJ2013.Events = function(){
                         .addClass('title')
                         .text(item.title);
                     remind = $('<a/>')
-                        .addClass('remind-btn button')
-                        .addClass(item.remind ? 'selected' : '')
+                        .addClass('remind-btn btn')
+                        .addClass(item.remind ? 'active btn-success' : '')
                         .text('Remind')
                         .click({guid:guid},onClickRemind);
                     category = $('<p/>')
@@ -430,8 +430,8 @@ KIJ2013.Events = function(){
                     .text(date.toLocaleString())
                     .appendTo(content);
                 $('<a/>')
-                    .addClass('button')
-                    .addClass(item.remind ? 'selected' : '')
+                    .addClass('btn')
+                    .addClass(item.remind ? 'active btn-success' : '')
                     .text('Remind')
                     .click({guid:guid},onClickRemind)
                     .appendTo(content);

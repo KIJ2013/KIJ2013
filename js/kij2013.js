@@ -552,7 +552,7 @@ KIJ2013.Map = function(){
 KIJ2013.Radio = function(){
     var loaded = false,
         player,
-        url = 'http://31.3.242.244:8046/;stream/1';
+        url = 'http://176.227.210.187:8046/;stream=1';
     return {
         init: function(){
             if(!loaded)

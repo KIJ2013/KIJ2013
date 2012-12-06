@@ -173,8 +173,34 @@ ul.listview li a
     cursor: pointer;
     font-size: 32px;
 }
+#news-list {
+    padding: 0;
+}
 #news-list li {
-    line-height: 48px;
+    display: inline-block;
+    width: 50%;
+    padding: 0;
+    vertical-align: bottom;
+    overflow: hidden;
+}
+#news-list a {
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100px;
+    position: relative;
+}
+#news-list span {
+    background-color: rgba(0,0,0,0.6);
+    bottom: 0;
+    color: white;
+    font-size: 16px;
+    left: 0;
+    padding: 2px;
+    position: absolute;
+    right: 0;
+    white-space: normal;
+}
 }
 #event-list p {
     margin: 0;

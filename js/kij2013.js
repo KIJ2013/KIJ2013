@@ -179,14 +179,9 @@ KIJ2013.Util = function(){
         }
     }
 }();
-KIJ2013.Menu = function(){
-    return {
-        init: function(){
-            KIJ2013.setActionBarUp();
-            KIJ2013.setTitle();
-        }
-    }
-}();
+$(function(){
+    KIJ2013.init();
+});
 KIJ2013.News = function(){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
@@ -832,6 +827,3 @@ KIJ2013.Settings = function(){
         }
     }
 }();
-$(function(){
-    KIJ2013.init();
-});

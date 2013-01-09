@@ -1,188 +1,203 @@
-var KIJ2013 = function(){
+var KIJ2013 = (function(window, $, Lawnchair){
     var preferences = {key:"preferences"},
         TABLE_PREFERENCES = "preferences",
         loading,
         beingLoaded,
         popup,
         store,
-        sections = ["news","events","map","radio","learn","barcode","settings"];
+        sections = ["news","events","map","radio","learn","barcode","settings"],
+        self = {};
 
-    return {
-        /**
-         * Initialise KIJ2013 objects, databases and preferences
-         * @param callback Allows a callack to be attached which fires when
-         *   preferences have finished loading.
-         */
-        init: function(callback){
-            store = Lawnchair({name: TABLE_PREFERENCES}, function(){
-                this.get("preferences", function(pref){
-                    if(pref)
-                        preferences = pref;
-                    if(typeof callback == "function"){
-                        callback();
-                    }
-                });
-            });
-            KIJ2013.setActionBarUp();
-            var i = 0,
-                select = $('#action_bar select');
-            select.empty();
-            for(;i < sections.length; i++)
-                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
-            select.change(function(){
-                KIJ2013.navigateTo($(this).val());
-            });
-            popup = $('#popup');
-            loading = $('#loading');
-            KIJ2013.News.init();
-            setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            //KIJ2013.navigateTo("News");
-            setTimeout(function(){
-                $('#splash').hide();
-                $('#action_bar').show();
-                var n = $('#news').show();
-                if(beingLoaded)
-                    beingLoaded = n;
-            },1500);
-        },
-        getPreference: function(name, def){
-            return preferences[name] || def || null;
-        },
-        setPreference: function(name, value)
-        {
-            if(name == "key") return;
-            preferences[name] = value;
-            store.save(preferences);
-        },
-        navigateTo: function(name) {
-            var sections = $('section:visible'),
-                nm;
-            $.each(sections, function(i,item){
-                nm = $(item).attr('id');
-                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
-                if(KIJ2013[nm] && typeof KIJ2013[nm].hide == "function")
-                    KIJ2013[nm].hide();
-            })
-            sections.hide();
-            $('#'+name.toLowerCase()).show();
-            KIJ2013.setTitle(name);
-            if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
-                KIJ2013[name].init();
-            KIJ2013.scrollTop();
-        },
-        setActionBarUp: function(fn)
-        {
-            if(typeof fn == "function")
-            {
-                $('#up-button').removeAttr('href').unbind().click(function(){
-                    fn();
-                    return false;
-                });
-                $('#up-icon').css({'visibility': 'visible'});
-            }
-            else if(typeof fn == "string")
-            {
-                $('#up-button').unbind().click(function(){
-                    KIJ2013.navigateTo(fn);
-                    return false;
-                });
-                $('#up-icon').css('visibility', 'visible');
-            }
-            else if(typeof fn == "undefined")
-                $('#up-icon').css('visibility', 'hidden');
-        },
-        setTitle: function(title)
-        {
-            var blank = typeof title == "undefined" || title == "",
-                default_title = "KIJ2013";
-            $('title').text(blank ? default_title : default_title + " - " + title);
-            $('#action_bar h1').text(blank ? default_title : title);
-        },
-        showLoading: function()
-        {
-            if(loading.length == 0)
-            {
-                loading = $('<div/>').attr('id', 'loading')
-                    .text("Loading").append(
-                        $('<img/>').attr('src',"img/ajax-loader.gif"))
-                    .appendTo('#body');
-            }
-            beingLoaded = $('section:visible').hide();
-            loading.show();
-        },
-        hideLoading: function(){
-            if(loading)
-                loading.hide();
-            if(beingLoaded){
-                beingLoaded.show();
-                beingLoaded = null;
-            }
-        },
-        showError: function(message)
-        {
-            if(popup.length == 0)
-            {
-                popup = $('<div/>').attr('id', 'popup').appendTo('body');
-            }
-            popup.text(message).show();
-            setTimeout(function(){
-                popup.slideUp('normal')
-            },5000);
-        },
-        scrollTop: function(){
-            window.scrollTo(0,1);
-        }
-    }
-}();
-KIJ2013.Util = function(){
-    return {
-        randomColor: function(min,max){
-            if(arguments.length < 2)
-                max = 255;
-            if(arguments.length < 1)
-                min = 0;
-            return "rgb("+((max-min)*Math.random()+min).toFixed()+","+
-                ((max-min)*Math.random()+min).toFixed()+","+
-                ((max-min)*Math.random()+min).toFixed()+")";
-        },
-        filter: function(field, value, condition, primer){
-            var key = function (x) {return primer ? primer(x[field]) : x[field]};
-            value = arguments.length == 2 ? arguments[1] : arguments[2];
-            condition = arguments.length == 2 ? "=" : arguments[1];
-            return function (a) {
-                var A = key(a);
-                return condition == "=" ? A == value :
-                    (condition == ">" ? A > value :
-                        (condition == "<" ? A < value : true)
-                    );
-            }
-        },
-        sort: function(field, reverse, primer){
-            var key = function (x) {return primer ? primer(x[field]) : x[field]};
-            reverse = typeof reverse == "undefined" || reverse;
-            return function (a,b) {
-                var A = key(a), B = key(b);
-                return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
-            }
-        },
-        merge: function(/* variable number of arrays */){
-            var out = [], array, count, len, i, j;
-            for(i = 0, count = arguments.length; i < count; i++){
-                array = arguments[i];
-                for(j = 0, len = array.length; j < len; j++){
-                    if(out.indexOf(array[j]) === -1) {
-                        out.push(array[j]);
-                    }
+    /**
+     * Initialise KIJ2013 objects, databases and preferences
+     * @param callback Allows a callack to be attached which fires when
+     *   preferences have finished loading.
+     */
+    self.init = function(callback){
+        store = Lawnchair({name: TABLE_PREFERENCES}, function(){
+            this.get("preferences", function(pref){
+                if(pref)
+                    preferences = pref;
+                if(typeof callback == "function"){
+                    callback();
                 }
-            }
-            return out;
+            });
+        });
+        self.setActionBarUp();
+        var i = 0,
+            select = $('#action_bar select');
+        select.empty();
+        for(;i < sections.length; i++)
+            select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+        select.change(function(){
+            self.navigateTo($(this).val());
+        });
+        popup = $('#popup');
+        loading = $('#loading');
+        self.News.init();
+        setTimeout(function() {window.scrollTo(0, 1);}, 0);
+        //KIJ2013.navigateTo("News");
+        setTimeout(function(){
+            $('#splash').hide();
+            $('#action_bar').show();
+            var n = $('#news').show();
+            if(beingLoaded)
+                beingLoaded = n;
+        },1500);
+    };
+
+    self.getPreference = function(name, def){
+        return preferences[name] || def || null;
+    };
+
+    self.setPreference = function(name, value)
+    {
+        if(name == "key") return;
+        preferences[name] = value;
+        store.save(preferences);
+    };
+
+    self.navigateTo = function(name) {
+        var sections = $('section:visible'),
+            nm;
+        $.each(sections, function(i,item){
+            nm = $(item).attr('id');
+            nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
+            if(self[nm] && typeof self[nm].hide == "function")
+                self[nm].hide();
+        })
+        sections.hide();
+        $('#'+name.toLowerCase()).show();
+        self.setTitle(name);
+        if(self[name] && typeof self[name].init == "function")
+            self[name].init();
+        self.scrollTop();
+    };
+
+    self.setActionBarUp = function(fn)
+    {
+        if(typeof fn == "function")
+        {
+            $('#up-button').removeAttr('href').unbind().click(function(){
+                fn();
+                return false;
+            });
+            $('#up-icon').css({'visibility': 'visible'});
         }
+        else if(typeof fn == "string")
+        {
+            $('#up-button').unbind().click(function(){
+                self.navigateTo(fn);
+                return false;
+            });
+            $('#up-icon').css('visibility', 'visible');
+        }
+        else if(typeof fn == "undefined")
+            $('#up-icon').css('visibility', 'hidden');
+    };
+
+    self.setTitle = function(title)
+    {
+        var blank = typeof title == "undefined" || title == "",
+            default_title = "KIJ2013";
+        $('title').text(blank ? default_title : default_title + " - " + title);
+        $('#action_bar h1').text(blank ? default_title : title);
+    };
+
+    self.showLoading = function()
+    {
+        if(loading.length == 0)
+        {
+            loading = $('<div/>').attr('id', 'loading')
+                .text("Loading").append(
+                    $('<img/>').attr('src',"img/ajax-loader.gif"))
+                .appendTo('#body');
+        }
+        beingLoaded = $('section:visible').hide();
+        loading.show();
     }
-}();
+
+    self.hideLoading = function(){
+        if(loading)
+            loading.hide();
+        if(beingLoaded){
+            beingLoaded.show();
+            beingLoaded = null;
+        }
+    };
+
+    self.showError = function(message)
+    {
+        if(popup.length == 0)
+        {
+            popup = $('<div/>').attr('id', 'popup').appendTo('body');
+        }
+        popup.text(message).show();
+        setTimeout(function(){
+            popup.slideUp('normal')
+        },5000);
+    }
+
+    self.scrollTop = function(){
+        window.scrollTo(0,1);
+    };
+
+    return self;
+})(window,jQuery,Lawnchair);
 $(function(){
     KIJ2013.init();
 });
-KIJ2013.News = function(){
+KIJ2013.Util = (function(){
+    var self = {};
+
+    self.randomColor = function(min,max){
+        if(arguments.length < 2)
+            max = 255;
+        if(arguments.length < 1)
+            min = 0;
+        return "rgb("+((max-min)*Math.random()+min).toFixed()+","+
+            ((max-min)*Math.random()+min).toFixed()+","+
+            ((max-min)*Math.random()+min).toFixed()+")";
+    };
+
+    self.filter = function(field, value, condition, primer){
+        var key = function (x) {return primer ? primer(x[field]) : x[field]};
+        value = arguments.length == 2 ? arguments[1] : arguments[2];
+        condition = arguments.length == 2 ? "=" : arguments[1];
+        return function (a) {
+            var A = key(a);
+            return condition == "=" ? A == value :
+                (condition == ">" ? A > value :
+                    (condition == "<" ? A < value : true)
+                );
+        }
+    };
+
+    self.sort = function(field, reverse, primer){
+        var key = function (x) {return primer ? primer(x[field]) : x[field]};
+        reverse = typeof reverse == "undefined" || reverse;
+        return function (a,b) {
+            var A = key(a), B = key(b);
+            return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
+        }
+    };
+
+    self.merge = function(/* variable number of arrays */){
+        var out = [], array, count, len, i, j;
+        for(i = 0, count = arguments.length; i < count; i++){
+            array = arguments[i];
+            for(j = 0, len = array.length; j < len; j++){
+                if(out.indexOf(array[j]) === -1) {
+                    out.push(array[j]);
+                }
+            }
+        }
+        return out;
+    };
+
+    return self;
+})();
+KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
         TABLE_NAME = 'news',
@@ -286,17 +301,19 @@ KIJ2013.News = function(){
             $('#news').empty().append(content);
             KIJ2013.scrollTop();
         });
+    },
+
+    self = {};
+
+    self.init = function(){
+        createDatabase();
+        fetchItems();
+        displayNewsList();
     };
 
-    return {
-        init: function(){
-            createDatabase();
-            fetchItems();
-            displayNewsList();
-        }
-    }
-}();
-KIJ2013.Events = function(){
+    return self;
+})(KIJ2013,$,Lawnchair);
+KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -453,17 +470,19 @@ KIJ2013.Events = function(){
                 $('#events').append(content);
             }
         });
+    },
+
+    self = {};
+
+    self.init = function() {
+        createDatabase();
+        displayEventsList();
+        fetchItems();
     };
 
-    return {
-        init: function() {
-            createDatabase();
-            displayEventsList();
-            fetchItems();
-        }
-    }
-}();
-KIJ2013.Map = function(){
+    return self;
+})(KIJ2013,jQuery,Lawnchair);
+KIJ2013.Map = (function(KIJ2013,$,navigator){
     var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
         51.305519711648124],
         img_size = [2516,1867],
@@ -487,93 +506,102 @@ KIJ2013.Map = function(){
             if(lat>img_bounds[3])
                 throw "OutOfBounds";
             return (lat-img_bounds[1])*yScale;
-        };
-    return {
-        init: function(){
-            var gl = navigator.geolocation;
-            if(!initialised){
-                img = $('#map img');
-                if(img.length == 0)
-                {
-                    KIJ2013.showLoading();
-                    img = $('<img />').attr('src', "img/map.png")
-                        .appendTo('#map').load(
-                        function(){
-                            KIJ2013.Map.moveTo(51.3015, 0.584);
-                            KIJ2013.hideLoading();
-                        });
-                }
-                marker = $('#marker');
-                initialised = true;
-            }
-            else
-                KIJ2013.Map.moveTo(51.3015, 0.584);
-            if(gl)
+        },
+
+        self = {};
+
+    self.init = function(){
+        var gl = navigator.geolocation;
+        if(!initialised){
+            img = $('#map img');
+            if(img.length == 0)
             {
-                gl.getCurrentPosition(function(position){
-                    var coords = position.coords,
-                        lat = coords.latitude,
-                        lon = coords.longitude;
-                    KIJ2013.Map.mark(lat, lon);
-                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
-                }, function(){KIJ2013.showError('Error Finding Location')});
+                KIJ2013.showLoading();
+                img = $('<img />').attr('src', "img/map.png")
+                    .appendTo('#map').load(
+                    function(){
+                        KIJ2013.Map.moveTo(51.3015, 0.584);
+                        KIJ2013.hideLoading();
+                    });
             }
-        },
-        moveTo: function(lat, lon)
-        {
-            try {
-                var win = $(window),
-                    height = win.height(),
-                    width = win.width(),
-                    x = lonToX(lon) - width / 2,
-                    y = img_size[1] - latToY(lat) - height / 2;
-                setTimeout(function(){window.scrollTo(x, y);},10);
-            }
-            catch (e){}
-        },
-        mark: function(lat, lon)
-        {
-            try {
-                marker.css({display: 'block', bottom: latToY(lat),
-                    left: lonToX(lon)});
-            }
-            catch (e){}
-        },
-        unmark: function(){
-            marker.css({display: 'none'});
+            marker = $('#marker');
+            initialised = true;
         }
-    }
-}();
-KIJ2013.Radio = function(){
+        else
+            KIJ2013.Map.moveTo(51.3015, 0.584);
+        if(gl)
+        {
+            gl.getCurrentPosition(function(position){
+                var coords = position.coords,
+                    lat = coords.latitude,
+                    lon = coords.longitude;
+                KIJ2013.Map.mark(lat, lon);
+                setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+            }, function(){KIJ2013.showError('Error Finding Location')});
+        }
+    };
+
+    self.moveTo = function(lat, lon)
+    {
+        try {
+            var win = $(window),
+                height = win.height(),
+                width = win.width(),
+                x = lonToX(lon) - width / 2,
+                y = img_size[1] - latToY(lat) - height / 2;
+            setTimeout(function(){window.scrollTo(x, y);},10);
+        }
+        catch (e){}
+    };
+
+    self.mark = function(lat, lon)
+    {
+        try {
+            marker.css({display: 'block', bottom: latToY(lat),
+                left: lonToX(lon)});
+        }
+        catch (e){}
+    };
+
+    self.unmark = function(){
+        marker.css({display: 'none'});
+    };
+
+    return self;
+})(KIJ2013,$,navigator);
+KIJ2013.Radio = (function(KIJ2013,$){
     var loaded = false,
         player,
-        url = 'http://176.227.210.187:8046/;stream=1';
-    return {
-        init: function(){
-            if(!loaded)
-            {
-                player = $('#player').jPlayer({
-                    cssSelectorAncestor: "#controls",
-                    nativeSupport: true,
-                    ready: function(){
-                        player.jPlayer("setMedia", {mp3:url}).jPlayer('play');
-                    },
-                    swfPath: 'swf',
-                    volume: 60,
-                    errorAlerts: true
-                });
-                loaded = true;
-            }
-            KIJ2013.setTitle('Radio');
+        url = 'http://176.227.210.187:8046/;stream=1',
+        self = {};
+
+    self.init = function(){
+        if(!loaded)
+        {
+            player = $('#player').jPlayer({
+                cssSelectorAncestor: "#controls",
+                nativeSupport: true,
+                ready: function(){
+                    player.jPlayer("setMedia", {mp3:url}).jPlayer('play');
+                },
+                swfPath: 'swf',
+                volume: 60,
+                errorAlerts: true
+            });
+            loaded = true;
         }
-    }
-}();
-KIJ2013.Learn = function(){
+        KIJ2013.setTitle('Radio');
+    };
+
+    return self;
+})(KIJ2013,jQuery);
+KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlight,
         store,
+        self = {},
 
     /**
      * Create Database
@@ -657,43 +685,44 @@ KIJ2013.Learn = function(){
         .success(success)
         .error(error);
     };
-    return {
-        init: function(){
+
+    self.init = function(){
+        createDatabase();
+        displayFoundList();
+    };
+
+    // Mark an item as found by inserting it into the database
+    self.add = function(id){
+        if(!store)
             createDatabase();
-            displayFoundList();
-        },
-        // Mark an item as found by inserting it into the database
-        add: function(id){
-            if(!store)
-                createDatabase();
-            store.get(id, function(item){
-                if(!item)
-                    store.save({ key: id,
-                        date: (new Date())/1000 });
-            });
-        },
-        highlight: function(id){
-            var el = $('#'+baseId+id),
-                cl = 'highlight';
-            if(el.length)
-            {
-                el.addClass(cl);
-                setTimeout(function(){
-                    el.removeClass(cl);
-                },3000);
-            }
-            else
-                highlight = id;
+        store.get(id, function(item){
+            if(!item)
+                store.save({ key: id,
+                    date: (new Date())/1000 });
+        });
+    };
+
+    self.highlight = function(id){
+        var el = $('#'+baseId+id),
+            cl = 'highlight';
+        if(el.length)
+        {
+            el.addClass(cl);
+            setTimeout(function(){
+                el.removeClass(cl);
+            },3000);
         }
-    }
-}();
-KIJ2013.Barcode = function(){
+        else
+            highlight = id;
+    };
+
+    return self;
+})(KIJ2013,jQuery,Lawnchair);
+KIJ2013.Barcode = (function(KIJ2013,win,nav){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
         localMediaStream = null,
-        nav = navigator,
-        win = window,
         qr = typeof qrcode !== "undefined" ? qrcode : false,
         snapshot = function (){
             if(localMediaStream && qr){
@@ -703,7 +732,8 @@ KIJ2013.Barcode = function(){
         },
         createObjectURL,
         interval,
-        initialised;
+        initialised,
+        self = {};
     canvas.width = 640;
     canvas.height = 480;
     // Normalise getUserMedia
@@ -736,47 +766,51 @@ KIJ2013.Barcode = function(){
             }
         };
     }
-    return {
-        init: function(){
-            if(nav.getUserMedia){
-                if(!initialised){
-                    nav.getUserMedia({video:true},
-                        function(stream) {
-                            // Display Preview
-                            video.src = createObjectURL(stream);
-                            // Keep reference to stream for snapshots
-                            localMediaStream = stream;
-                            initialised = true;
-                            KIJ2013.Barcode.start();
-                        },
-                        function(err) {
-                            console.log("Unable to get video stream!")
-                        }
-                    );
-                }
-                else
-                    KIJ2013.Barcode.start();
+
+    self.init = function(){
+        if(nav.getUserMedia){
+            if(!initialised){
+                nav.getUserMedia({video:true},
+                    function(stream) {
+                        // Display Preview
+                        video.src = createObjectURL(stream);
+                        // Keep reference to stream for snapshots
+                        localMediaStream = stream;
+                        initialised = true;
+                        KIJ2013.Barcode.start();
+                    },
+                    function(err) {
+                        console.log("Unable to get video stream!")
+                    }
+                );
             }
             else
-                KIJ2013.showError('Barcode Scanner is not available on your '
-                    + 'platform.')
-        },
-        start: function(){
-            video.play();
-            if(interval)
-                clearInterval(interval);
-            interval = setInterval(snapshot, 1000);
-        },
-        stop: function(){
-            video.pause();
-            clearInterval(interval);
-        },
-        hide: function(){
-            KIJ2013.Barcode.stop();
+                KIJ2013.Barcode.start();
         }
-    }
-}();
-KIJ2013.Settings = function(){
+        else
+            KIJ2013.showError('Barcode Scanner is not available on your '
+                + 'platform.')
+    };
+
+    self.start = function(){
+        video.play();
+        if(interval)
+            clearInterval(interval);
+        interval = setInterval(snapshot, 1000);
+    };
+
+    self.stop = function(){
+        video.pause();
+        clearInterval(interval);
+    };
+
+    self.hide = function(){
+        KIJ2013.Barcode.stop();
+    };
+
+    return self;
+})(KIJ2013,window,navigator);
+KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -786,44 +820,44 @@ KIJ2013.Settings = function(){
         TABLE_LEARN = "learn",
         TABLE_PREFS = "preferences",
         subcamp_el,
-        initialised = false;
+        initialised = false,
+        self = {};
 
-    return {
-        init: function() {
-            if(!initialised){
-                subcamp_el = $('#subcamp');
-                subcamp_el.val(KIJ2013.getPreference('subcamp'))
-                subcamp_el.change(function(){
-                    var val = subcamp_el.val();
-                    KIJ2013.setPreference("subcamp", val);
+    self.init = function() {
+        if(!initialised){
+            subcamp_el = $('#subcamp');
+            subcamp_el.val(KIJ2013.getPreference('subcamp'))
+            subcamp_el.change(function(){
+                var val = subcamp_el.val();
+                KIJ2013.setPreference("subcamp", val);
+            });
+            $('#clear-cache').click(function(){
+                var all_done = 0;
+                Lawnchair({name: TABLE_NEWS}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                $('#clear-cache').click(function(){
-                    var all_done = 0;
-                    Lawnchair({name: TABLE_NEWS}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
-                    Lawnchair({name: TABLE_EVENTS}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
-                    Lawnchair({name: TABLE_LEARN}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
+                Lawnchair({name: TABLE_EVENTS}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                $('#clear-preferences').click(function(){
-                    Lawnchair({name: TABLE_PREFS}, function(){
-                        this.nuke();
-                        subcamp_el.val('');
-                        alert("Preferences Cleared");
-                    });
+                Lawnchair({name: TABLE_LEARN}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                initialised = true;
-            }
+            });
+            $('#clear-preferences').click(function(){
+                Lawnchair({name: TABLE_PREFS}, function(){
+                    this.nuke();
+                    subcamp_el.val('');
+                    alert("Preferences Cleared");
+                });
+            });
+            initialised = true;
         }
     }
-}();
+    return self;
+})(KIJ2013, jQuery, Lawnchair);

@@ -1,4 +1,4 @@
-KIJ2013.News = function(){
+KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
         TABLE_NAME = 'news',
@@ -102,13 +102,15 @@ KIJ2013.News = function(){
             $('#news').empty().append(content);
             KIJ2013.scrollTop();
         });
+    },
+
+    self = {};
+
+    self.init = function(){
+        createDatabase();
+        fetchItems();
+        displayNewsList();
     };
 
-    return {
-        init: function(){
-            createDatabase();
-            fetchItems();
-            displayNewsList();
-        }
-    }
-}();
+    return self;
+})(KIJ2013,$,Lawnchair);

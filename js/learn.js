@@ -1,9 +1,10 @@
-KIJ2013.Learn = function(){
+KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlight,
         store,
+        self = {},
 
     /**
      * Create Database
@@ -87,33 +88,36 @@ KIJ2013.Learn = function(){
         .success(success)
         .error(error);
     };
-    return {
-        init: function(){
+
+    self.init = function(){
+        createDatabase();
+        displayFoundList();
+    };
+
+    // Mark an item as found by inserting it into the database
+    self.add = function(id){
+        if(!store)
             createDatabase();
-            displayFoundList();
-        },
-        // Mark an item as found by inserting it into the database
-        add: function(id){
-            if(!store)
-                createDatabase();
-            store.get(id, function(item){
-                if(!item)
-                    store.save({ key: id,
-                        date: (new Date())/1000 });
-            });
-        },
-        highlight: function(id){
-            var el = $('#'+baseId+id),
-                cl = 'highlight';
-            if(el.length)
-            {
-                el.addClass(cl);
-                setTimeout(function(){
-                    el.removeClass(cl);
-                },3000);
-            }
-            else
-                highlight = id;
+        store.get(id, function(item){
+            if(!item)
+                store.save({ key: id,
+                    date: (new Date())/1000 });
+        });
+    };
+
+    self.highlight = function(id){
+        var el = $('#'+baseId+id),
+            cl = 'highlight';
+        if(el.length)
+        {
+            el.addClass(cl);
+            setTimeout(function(){
+                el.removeClass(cl);
+            },3000);
         }
-    }
-}();
+        else
+            highlight = id;
+    };
+
+    return self;
+})(KIJ2013,jQuery,Lawnchair);

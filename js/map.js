@@ -84,4 +84,4 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
     };
 
     return self;
-})(KIJ2013,$,navigator);
+}(KIJ2013,$,navigator));

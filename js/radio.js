@@ -23,4 +23,4 @@ KIJ2013.Radio = (function(KIJ2013,$){
     };
 
     return self;
-})(KIJ2013,jQuery);
+}(KIJ2013,jQuery));

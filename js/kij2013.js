@@ -143,7 +143,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
     };
 
     return self;
-})(window,jQuery,Lawnchair);
+}(window,jQuery,Lawnchair));
 $(function(){
     KIJ2013.init();
 });
@@ -196,7 +196,7 @@ KIJ2013.Util = (function(){
     };
 
     return self;
-})();
+}());
 KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
@@ -312,7 +312,7 @@ KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     };
 
     return self;
-})(KIJ2013,$,Lawnchair);
+}(KIJ2013,jQuery,Lawnchair));
 KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
 
     /**
@@ -481,7 +481,7 @@ KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
     };
 
     return self;
-})(KIJ2013,jQuery,Lawnchair);
+}(KIJ2013,jQuery,Lawnchair));
 KIJ2013.Map = (function(KIJ2013,$,navigator){
     var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
         51.305519711648124],
@@ -568,7 +568,7 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
     };
 
     return self;
-})(KIJ2013,$,navigator);
+}(KIJ2013,$,navigator));
 KIJ2013.Radio = (function(KIJ2013,$){
     var loaded = false,
         player,
@@ -594,7 +594,7 @@ KIJ2013.Radio = (function(KIJ2013,$){
     };
 
     return self;
-})(KIJ2013,jQuery);
+}(KIJ2013,jQuery));
 KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
@@ -717,7 +717,7 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     };
 
     return self;
-})(KIJ2013,jQuery,Lawnchair);
+}(KIJ2013,jQuery,Lawnchair));
 KIJ2013.Barcode = (function(KIJ2013,win,nav){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],
@@ -809,7 +809,7 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
     };
 
     return self;
-})(KIJ2013,window,navigator);
+}(KIJ2013,window,navigator));
 KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
 
     /**
@@ -860,4 +860,4 @@ KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
         }
     }
     return self;
-})(KIJ2013, jQuery, Lawnchair);
+}(KIJ2013, jQuery, Lawnchair));

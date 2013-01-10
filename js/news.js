@@ -113,4 +113,4 @@ KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     };
 
     return self;
-})(KIJ2013,$,Lawnchair);
+}(KIJ2013,jQuery,Lawnchair));

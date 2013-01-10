@@ -120,4 +120,4 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     };
 
     return self;
-})(KIJ2013,jQuery,Lawnchair);
+}(KIJ2013,jQuery,Lawnchair));

@@ -143,7 +143,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
     };
 
     return self;
-})(window,jQuery,Lawnchair);
+}(window,jQuery,Lawnchair));
 $(function(){
     KIJ2013.init();
 });
@@ -196,4 +196,4 @@ KIJ2013.Util = (function(){
     };
 
     return self;
-})();
+}());

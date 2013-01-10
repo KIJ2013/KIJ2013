@@ -5,4 +5,4 @@ KIJ2013.Menu = (function(KIJ2013){
             KIJ2013.setTitle();
         }
     }
-})(KIJ2013);
+}(KIJ2013));

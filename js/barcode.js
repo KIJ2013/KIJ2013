@@ -89,4 +89,4 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
     };
 
     return self;
-})(KIJ2013,window,navigator);
+}(KIJ2013,window,navigator));

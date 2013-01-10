@@ -224,6 +224,11 @@ form {
 
 /* GENERAL ELEMENT TYPE STYLES */
 
+header h1 {
+  background: transparent url('../images/appicon.s.64.png') 0 0 no-repeat;
+  padding-left: 64px;
+}
+
 #main-content h1 {
   font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif; 
   font-size: 2.8em;

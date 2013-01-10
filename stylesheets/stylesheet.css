@@ -389,7 +389,9 @@ footer a:hover {
     width: 340px;
   }
   header h1 {
+    background-image: url('../images/appicon.s.48.png');
     font-size: 60px;
+    padding-left: 48px;
   }
   header h2 {
     font-size: 30px;
@@ -424,7 +426,9 @@ footer a:hover {
     width: 100%;
   }
   header h1 {
+    background-image: url('../images/appicon.s.36.png');
     font-size: 48px;
+    padding-left: 36px;
   }
   header h2 {
     font-size: 24px;

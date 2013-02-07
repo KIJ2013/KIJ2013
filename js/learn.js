@@ -2,9 +2,8 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
-        highlight,
+        highlighted_item,
         store,
-        self = {},
 
     /**
      * Create Database
@@ -36,10 +35,10 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
                     el = $('<a/>').text(title);
                     el.data('guid', id);
                     el.click(onClickLearnItem);
-                    if(id == highlight)
+                    if(id == highlighted_item)
                     {
                         li.addClass('highlight');
-                        highlight = null;
+                        highlighted_item = null;
                     }
                     li.append(el);
                     list.append(li);
@@ -87,15 +86,15 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
         })
         .success(success)
         .error(error);
-    };
+    },
 
-    self.init = function(){
+    init = function(){
         createDatabase();
         displayFoundList();
-    };
+    },
 
     // Mark an item as found by inserting it into the database
-    self.add = function(id){
+    add = function(id){
         if(!store)
             createDatabase();
         store.get(id, function(item){
@@ -103,9 +102,9 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
                 store.save({ key: id,
                     date: (new Date())/1000 });
         });
-    };
+    },
 
-    self.highlight = function(id){
+    highlight = function(id){
         var el = $('#'+baseId+id),
             cl = 'highlight';
         if(el.length)
@@ -116,7 +115,13 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
             },3000);
         }
         else
-            highlight = id;
+            highlighted_item = id;
+    },
+
+    self = {
+        init: init,
+        add: add,
+        highlight: highlight
     };
 
     return self;

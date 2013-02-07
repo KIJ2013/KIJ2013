@@ -6,140 +6,156 @@ var KIJ2013 = (function(window, $, Lawnchair){
         popup,
         store,
         sections = ["news","events","map","radio","learn","barcode","settings"],
-        self = {};
+        self,
 
-    /**
-     * Initialise KIJ2013 objects, databases and preferences
-     * @param callback Allows a callack to be attached which fires when
-     *   preferences have finished loading.
+        /**
+         * Initialise KIJ2013 objects, databases and preferences
+         * @param callback Allows a callack to be attached which fires when
+         *   preferences have finished loading.
+         */
+        init = function(callback){
+            store = Lawnchair({name: TABLE_PREFERENCES}, function(){
+                this.get("preferences", function(pref){
+                    if(pref)
+                        preferences = pref;
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                });
+            });
+            setActionBarUp();
+            var i = 0,
+                select = $('#action_bar select');
+            select.empty();
+            for(;i < sections.length; i++)
+                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+            select.change(function(){
+                navigateTo($(this).val());
+            });
+            popup = $('#popup');
+            loading = $('#loading');
+            self.News.init();
+            setTimeout(function() {window.scrollTo(0, 1);}, 0);
+            //KIJ2013.navigateTo("News");
+            setTimeout(function(){
+                $('#splash').hide();
+                $('#action_bar').show();
+                var n = $('#news').show();
+                if(beingLoaded)
+                    beingLoaded = n;
+            },1500);
+        },
+
+        getPreference = function(name, def){
+            return preferences[name] || def || null;
+        },
+
+        setPreference = function(name, value)
+        {
+            if(name == "key") return;
+            preferences[name] = value;
+            store.save(preferences);
+        },
+
+        navigateTo = function(name) {
+            var sections = $('section:visible'),
+                nm;
+            $.each(sections, function(i,item){
+                nm = $(item).attr('id');
+                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
+                if(self[nm] && typeof self[nm].hide == "function")
+                    self[nm].hide();
+            })
+            sections.hide();
+            $('#'+name.toLowerCase()).show();
+            setTitle(name);
+            if(self[name] && typeof self[name].init == "function")
+                self[name].init();
+            scrollTop();
+        },
+
+        setActionBarUp = function(fn)
+        {
+            if(typeof fn == "function")
+            {
+                $('#up-button').removeAttr('href').unbind().click(function(){
+                    fn();
+                    return false;
+                });
+                $('#up-icon').css({'visibility': 'visible'});
+            }
+            else if(typeof fn == "string")
+            {
+                $('#up-button').unbind().click(function(){
+                    navigateTo(fn);
+                    return false;
+                });
+                $('#up-icon').css('visibility', 'visible');
+            }
+            else if(typeof fn == "undefined")
+                $('#up-icon').css('visibility', 'hidden');
+        },
+
+        setTitle = function(title)
+        {
+            var blank = typeof title == "undefined" || title == "",
+                default_title = "KIJ2013";
+            $('title').text(blank ? default_title : default_title + " - " + title);
+            $('#action_bar h1').text(blank ? default_title : title);
+        },
+
+        showLoading = function()
+        {
+            if(loading.length == 0)
+            {
+                loading = $('<div/>').attr('id', 'loading')
+                    .text("Loading").append(
+                        $('<img/>').attr('src',"img/ajax-loader.gif"))
+                    .appendTo('#body');
+            }
+            beingLoaded = $('section:visible').hide();
+            loading.show();
+        },
+
+        hideLoading = function(){
+            if(loading)
+                loading.hide();
+            if(beingLoaded){
+                beingLoaded.show();
+                beingLoaded = null;
+            }
+        },
+
+        showError = function(message)
+        {
+            if(popup.length == 0)
+            {
+                popup = $('<div/>').attr('id', 'popup').appendTo('body');
+            }
+            popup.text(message).show();
+            setTimeout(function(){
+                popup.slideUp('normal')
+            },5000);
+        },
+
+        scrollTop = function(){
+            window.scrollTo(0,1);
+        };
+
+    /*
+     * Export public API functions
      */
-    self.init = function(callback){
-        store = Lawnchair({name: TABLE_PREFERENCES}, function(){
-            this.get("preferences", function(pref){
-                if(pref)
-                    preferences = pref;
-                if(typeof callback == "function"){
-                    callback();
-                }
-            });
-        });
-        self.setActionBarUp();
-        var i = 0,
-            select = $('#action_bar select');
-        select.empty();
-        for(;i < sections.length; i++)
-            select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
-        select.change(function(){
-            self.navigateTo($(this).val());
-        });
-        popup = $('#popup');
-        loading = $('#loading');
-        self.News.init();
-        setTimeout(function() {window.scrollTo(0, 1);}, 0);
-        //KIJ2013.navigateTo("News");
-        setTimeout(function(){
-            $('#splash').hide();
-            $('#action_bar').show();
-            var n = $('#news').show();
-            if(beingLoaded)
-                beingLoaded = n;
-        },1500);
-    };
-
-    self.getPreference = function(name, def){
-        return preferences[name] || def || null;
-    };
-
-    self.setPreference = function(name, value)
-    {
-        if(name == "key") return;
-        preferences[name] = value;
-        store.save(preferences);
-    };
-
-    self.navigateTo = function(name) {
-        var sections = $('section:visible'),
-            nm;
-        $.each(sections, function(i,item){
-            nm = $(item).attr('id');
-            nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
-            if(self[nm] && typeof self[nm].hide == "function")
-                self[nm].hide();
-        })
-        sections.hide();
-        $('#'+name.toLowerCase()).show();
-        self.setTitle(name);
-        if(self[name] && typeof self[name].init == "function")
-            self[name].init();
-        self.scrollTop();
-    };
-
-    self.setActionBarUp = function(fn)
-    {
-        if(typeof fn == "function")
-        {
-            $('#up-button').removeAttr('href').unbind().click(function(){
-                fn();
-                return false;
-            });
-            $('#up-icon').css({'visibility': 'visible'});
-        }
-        else if(typeof fn == "string")
-        {
-            $('#up-button').unbind().click(function(){
-                self.navigateTo(fn);
-                return false;
-            });
-            $('#up-icon').css('visibility', 'visible');
-        }
-        else if(typeof fn == "undefined")
-            $('#up-icon').css('visibility', 'hidden');
-    };
-
-    self.setTitle = function(title)
-    {
-        var blank = typeof title == "undefined" || title == "",
-            default_title = "KIJ2013";
-        $('title').text(blank ? default_title : default_title + " - " + title);
-        $('#action_bar h1').text(blank ? default_title : title);
-    };
-
-    self.showLoading = function()
-    {
-        if(loading.length == 0)
-        {
-            loading = $('<div/>').attr('id', 'loading')
-                .text("Loading").append(
-                    $('<img/>').attr('src',"img/ajax-loader.gif"))
-                .appendTo('#body');
-        }
-        beingLoaded = $('section:visible').hide();
-        loading.show();
-    }
-
-    self.hideLoading = function(){
-        if(loading)
-            loading.hide();
-        if(beingLoaded){
-            beingLoaded.show();
-            beingLoaded = null;
-        }
-    };
-
-    self.showError = function(message)
-    {
-        if(popup.length == 0)
-        {
-            popup = $('<div/>').attr('id', 'popup').appendTo('body');
-        }
-        popup.text(message).show();
-        setTimeout(function(){
-            popup.slideUp('normal')
-        },5000);
-    }
-
-    self.scrollTop = function(){
-        window.scrollTo(0,1);
+    self = {
+        getPreference: getPreference,
+        hideLoading: hideLoading,
+        init: init,
+        navigateTo: navigateTo,
+        scrollTop: scrollTop,
+        setActionBarUp: setActionBarUp,
+        setPreference: setPreference,
+        setTitle: setTitle,
+        showError: showError,
+        showLoading: showLoading
     };
 
     return self;
@@ -148,54 +164,57 @@ $(function(){
     KIJ2013.init();
 });
 KIJ2013.Util = (function(){
-    var self = {};
+    var randomColor = function(min,max){
+            if(arguments.length < 2)
+                max = 255;
+            if(arguments.length < 1)
+                min = 0;
+            return "rgb("+((max-min)*Math.random()+min).toFixed()+","+
+                ((max-min)*Math.random()+min).toFixed()+","+
+                ((max-min)*Math.random()+min).toFixed()+")";
+        },
 
-    self.randomColor = function(min,max){
-        if(arguments.length < 2)
-            max = 255;
-        if(arguments.length < 1)
-            min = 0;
-        return "rgb("+((max-min)*Math.random()+min).toFixed()+","+
-            ((max-min)*Math.random()+min).toFixed()+","+
-            ((max-min)*Math.random()+min).toFixed()+")";
-    };
+        filter = function(field, value, condition, primer){
+            var key = function (x) {return primer ? primer(x[field]) : x[field]};
+            value = arguments.length == 2 ? arguments[1] : arguments[2];
+            condition = arguments.length == 2 ? "=" : arguments[1];
+            return function (a) {
+                var A = key(a);
+                return condition == "=" ? A == value :
+                    (condition == ">" ? A > value :
+                        (condition == "<" ? A < value : true)
+                    );
+            }
+        },
 
-    self.filter = function(field, value, condition, primer){
-        var key = function (x) {return primer ? primer(x[field]) : x[field]};
-        value = arguments.length == 2 ? arguments[1] : arguments[2];
-        condition = arguments.length == 2 ? "=" : arguments[1];
-        return function (a) {
-            var A = key(a);
-            return condition == "=" ? A == value :
-                (condition == ">" ? A > value :
-                    (condition == "<" ? A < value : true)
-                );
-        }
-    };
+        sort = function(field, reverse, primer){
+            var key = function (x) {return primer ? primer(x[field]) : x[field]};
+            reverse = typeof reverse == "undefined" || reverse;
+            return function (a,b) {
+                var A = key(a), B = key(b);
+                return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
+            }
+        },
 
-    self.sort = function(field, reverse, primer){
-        var key = function (x) {return primer ? primer(x[field]) : x[field]};
-        reverse = typeof reverse == "undefined" || reverse;
-        return function (a,b) {
-            var A = key(a), B = key(b);
-            return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
-        }
-    };
-
-    self.merge = function(/* variable number of arrays */){
-        var out = [], array, count, len, i, j;
-        for(i = 0, count = arguments.length; i < count; i++){
-            array = arguments[i];
-            for(j = 0, len = array.length; j < len; j++){
-                if(out.indexOf(array[j]) === -1) {
-                    out.push(array[j]);
+        merge = function(/* variable number of arrays */){
+            var out = [], array, count, len, i, j;
+            for(i = 0, count = arguments.length; i < count; i++){
+                array = arguments[i];
+                for(j = 0, len = array.length; j < len; j++){
+                    if(out.indexOf(array[j]) === -1) {
+                        out.push(array[j]);
+                    }
                 }
             }
-        }
-        return out;
-    };
+            return out;
+        };
 
-    return self;
+    return {
+        randomColor: randomColor,
+        filter: filter,
+        sort: sort,
+        merge: merge
+    };
 }());
 KIJ2013.News = (function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
@@ -508,64 +527,69 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
             return (lat-img_bounds[1])*yScale;
         },
 
-        self = {};
-
-    self.init = function(){
-        var gl = navigator.geolocation;
-        if(!initialised){
-            img = $('#map img');
-            if(img.length == 0)
-            {
-                KIJ2013.showLoading();
-                img = $('<img />').attr('src', "img/map.png")
-                    .appendTo('#map').load(
-                    function(){
-                        KIJ2013.Map.moveTo(51.3015, 0.584);
-                        KIJ2013.hideLoading();
-                    });
+        init = function(){
+            var gl = navigator.geolocation;
+            if(!initialised){
+                img = $('#map img');
+                if(img.length == 0)
+                {
+                    KIJ2013.showLoading();
+                    img = $('<img />').attr('src', "img/map.png")
+                        .appendTo('#map').load(
+                        function(){
+                            KIJ2013.Map.moveTo(51.3015, 0.584);
+                            KIJ2013.hideLoading();
+                        });
+                }
+                marker = $('#marker');
+                initialised = true;
             }
-            marker = $('#marker');
-            initialised = true;
-        }
-        else
-            KIJ2013.Map.moveTo(51.3015, 0.584);
-        if(gl)
+            else
+                KIJ2013.Map.moveTo(51.3015, 0.584);
+            if(gl)
+            {
+                gl.getCurrentPosition(function(position){
+                    var coords = position.coords,
+                        lat = coords.latitude,
+                        lon = coords.longitude;
+                    KIJ2013.Map.mark(lat, lon);
+                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+                }, function(){KIJ2013.showError('Error Finding Location')});
+            }
+        },
+
+        moveTo = function(lat, lon)
         {
-            gl.getCurrentPosition(function(position){
-                var coords = position.coords,
-                    lat = coords.latitude,
-                    lon = coords.longitude;
-                KIJ2013.Map.mark(lat, lon);
-                setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
-            }, function(){KIJ2013.showError('Error Finding Location')});
-        }
-    };
+            try {
+                var win = $(window),
+                    height = win.height(),
+                    width = win.width(),
+                    x = lonToX(lon) - width / 2,
+                    y = img_size[1] - latToY(lat) - height / 2;
+                setTimeout(function(){window.scrollTo(x, y);},10);
+            }
+            catch (e){}
+        },
 
-    self.moveTo = function(lat, lon)
-    {
-        try {
-            var win = $(window),
-                height = win.height(),
-                width = win.width(),
-                x = lonToX(lon) - width / 2,
-                y = img_size[1] - latToY(lat) - height / 2;
-            setTimeout(function(){window.scrollTo(x, y);},10);
-        }
-        catch (e){}
-    };
+        mark = function(lat, lon)
+        {
+            try {
+                marker.css({display: 'block', bottom: latToY(lat),
+                    left: lonToX(lon)});
+            }
+            catch (e){}
+        },
 
-    self.mark = function(lat, lon)
-    {
-        try {
-            marker.css({display: 'block', bottom: latToY(lat),
-                left: lonToX(lon)});
-        }
-        catch (e){}
-    };
+        unmark = function(){
+            marker.css({display: 'none'});
+        },
 
-    self.unmark = function(){
-        marker.css({display: 'none'});
-    };
+        self = {
+            init: init,
+            moveTo: moveTo,
+            mark: mark,
+            unmark: unmark
+        };
 
     return self;
 }(KIJ2013,$,navigator));
@@ -599,9 +623,8 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
-        highlight,
+        highlighted_item,
         store,
-        self = {},
 
     /**
      * Create Database
@@ -633,10 +656,10 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
                     el = $('<a/>').text(title);
                     el.data('guid', id);
                     el.click(onClickLearnItem);
-                    if(id == highlight)
+                    if(id == highlighted_item)
                     {
                         li.addClass('highlight');
-                        highlight = null;
+                        highlighted_item = null;
                     }
                     li.append(el);
                     list.append(li);
@@ -684,15 +707,15 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
         })
         .success(success)
         .error(error);
-    };
+    },
 
-    self.init = function(){
+    init = function(){
         createDatabase();
         displayFoundList();
-    };
+    },
 
     // Mark an item as found by inserting it into the database
-    self.add = function(id){
+    add = function(id){
         if(!store)
             createDatabase();
         store.get(id, function(item){
@@ -700,9 +723,9 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
                 store.save({ key: id,
                     date: (new Date())/1000 });
         });
-    };
+    },
 
-    self.highlight = function(id){
+    highlight = function(id){
         var el = $('#'+baseId+id),
             cl = 'highlight';
         if(el.length)
@@ -713,7 +736,13 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
             },3000);
         }
         else
-            highlight = id;
+            highlighted_item = id;
+    },
+
+    self = {
+        init: init,
+        add: add,
+        highlight: highlight
     };
 
     return self;
@@ -724,50 +753,18 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
         ctx = canvas.getContext('2d'),
         localMediaStream = null,
         qr = typeof qrcode !== "undefined" ? qrcode : false,
-        snapshot = function (){
-            if(localMediaStream && qr){
-                ctx.drawImage(video,0,0);
-                qr.decode(canvas.toDataURL('image/webp'));
-            }
-        },
-        createObjectURL,
         interval,
         initialised,
-        self = {};
-    canvas.width = 640;
-    canvas.height = 480;
-    // Normalise getUserMedia
-    nav.getUserMedia ||
-        (nav.getUserMedia = nav.webkitGetUserMedia);
-    // Normalise window URL
-    win.URL ||
-        (win.URL = win.webkitURL || win.msURL || win.oURL);
-    // Avoid opera quirk
-    createObjectURL = function(stream){
-        return (win.URL && win.URL.createObjectURL) ?
-            win.URL.createObjectURL(stream) : stream;
-    };
-    if(qr){
-        // Set callback for detection of QR Code
-        qr.callback = function (a)
-        {
-            if(a){
-                var id = a.slice(26);
-                if(a.slice(0,26) == "http://kij13.org.uk/learn/")
-                {
-                    KIJ2013.Barcode.stop();
-                    KIJ2013.Learn.add(id);
-                    alert("Congratulations you found an item.");
-                    KIJ2013.navigateTo('Learn');
-                    KIJ2013.Learn.highlight(id);
-                }
-                else
-                    alert(a);
-            }
-        };
-    }
 
-    self.init = function(){
+    init = function(){
+        canvas.width = 640;
+        canvas.height = 480;
+        // Normalise getUserMedia
+        nav.getUserMedia ||
+            (nav.getUserMedia = nav.webkitGetUserMedia);
+        // Normalise window URL
+        win.URL ||
+            (win.URL = win.webkitURL || win.msURL || win.oURL);
         if(nav.getUserMedia){
             if(!initialised){
                 nav.getUserMedia({video:true},
@@ -790,22 +787,64 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
         else
             KIJ2013.showError('Barcode Scanner is not available on your '
                 + 'platform.')
-    };
+    },
 
-    self.start = function(){
+    // Avoid opera quirk
+    createObjectURL = function(stream){
+        return (win.URL && win.URL.createObjectURL) ?
+            win.URL.createObjectURL(stream) : stream;
+    },
+
+    snapshot = function (){
+        if(localMediaStream && qr){
+            ctx.drawImage(video,0,0);
+            qr.decode(canvas.toDataURL('image/webp'));
+        }
+    },
+
+    start = function(){
         video.play();
         if(interval)
             clearInterval(interval);
         interval = setInterval(snapshot, 1000);
-    };
+    },
 
-    self.stop = function(){
+    stop = function(){
         video.pause();
         clearInterval(interval);
-    };
+    },
 
-    self.hide = function(){
+    hide = function(){
         KIJ2013.Barcode.stop();
+    },
+
+    self;
+
+    if(qr){
+        // Set callback for detection of QR Code
+        qr.callback = function (a)
+        {
+            if(a){
+                var id = a.slice(26);
+                if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+                {
+                    KIJ2013.Barcode.stop();
+                    KIJ2013.Learn.add(id);
+                    alert("Congratulations you found an item.");
+                    KIJ2013.navigateTo('Learn');
+                    KIJ2013.Learn.highlight(id);
+                }
+                else
+                    alert(a);
+            }
+        };
+    }
+
+    self = {
+        init: init,
+        start: start,
+        stop: stop,
+        hide: hide
     };
 
     return self;

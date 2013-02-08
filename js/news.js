@@ -4,7 +4,7 @@
         TABLE_NAME = 'news',
         store,
         fetching = false,
-        view = "list",
+        view = null,
 
     createDatabase = function() {
         store = new Lawnchair({name: TABLE_NAME},function(){});
@@ -48,13 +48,13 @@
 
     onClickNewsItem = function(event)
     {
-        view = "item";
         var sender = $(event.target);
         displayNewsItem(sender.data('guid'));
     },
 
     displayNewsList = function()
     {
+        view = "list";
         KIJ2013.setActionBarUp();
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
@@ -90,8 +90,8 @@
     },
 
     displayNewsItem = function(guid){
+        view = "item";
         KIJ2013.setActionBarUp(function(){
-            view = "list";
             displayNewsList();
         });
         store.get(guid, function(item){
@@ -107,11 +107,20 @@
     init = function(){
         createDatabase();
         fetchItems();
+    },
+
+    show = function(){
         displayNewsList();
+    },
+
+    hide = function() {
+        view = null;
     };
 
     KIJ2013.Modules.News = {
-        init: init
+        init: init,
+        show: show,
+        hide: hide
     };
 
 }(KIJ2013,jQuery,Lawnchair));

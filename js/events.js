@@ -7,6 +7,7 @@
     var jsonURL = "events.json",
         TABLE_NAME = "events",
         store,
+        visible = false,
 
     /**
      * Create Database
@@ -36,7 +37,10 @@
                 });
                 items.push(item);
             });
-            store.batch(items, function(){displayEventsList();});
+            store.batch(items, function(){
+                if(visible)
+                    displayEventsList();
+            });
         },"json").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Events: '+status);
         });
@@ -159,12 +163,22 @@
 
     init = function() {
         createDatabase();
-        displayEventsList();
         fetchItems();
+    },
+
+    show = function(){
+        visible = true;
+        displayEventsList();
+    },
+
+    hide = function(){
+        visible = false;
     };
 
     KIJ2013.Modules.Events = {
-        init: init
+        init: init,
+        show: show,
+        hide: hide
     };
 
 }(KIJ2013,jQuery,Lawnchair));

@@ -90,6 +90,9 @@
 
     init = function(){
         createDatabase();
+    },
+
+    show = function(){
         displayFoundList();
     },
 
@@ -120,6 +123,7 @@
 
     KIJ2013.Modules.Learn = {
         init: init,
+        show: show,
         add: add,
         highlight: highlight
     };

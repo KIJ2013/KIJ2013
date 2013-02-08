@@ -24,7 +24,7 @@
             return (lat-img_bounds[1])*yScale;
         },
 
-        init = function(){
+        show = function(){
             var gl = navigator.geolocation;
             if(!initialised){
                 img = $('#map img');
@@ -82,7 +82,7 @@
         };
 
     KIJ2013.Modules.Map =  {
-        init: init,
+        show: show,
         moveTo: moveTo,
         mark: mark,
         unmark: unmark

@@ -30,20 +30,18 @@ var KIJ2013 = (function(window, $, Lawnchair){
                 if(!first)
                     first = module;
                 select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
+                if(typeof modules[module].init == "function")
+                    modules[module].init();
             }
             select.change(function(){
                 navigateTo(select.val());
             });
             popup = $('#popup');
             loading = $('#loading');
-            modules[first].init();
             setTimeout(function() {window.scrollTo(0, 1);}, 0);
             setTimeout(function(){
-                $('#splash').hide();
                 $('#action_bar').show();
-                var n = $('#news').show();
-                if(beingLoaded)
-                    beingLoaded = n;
+                navigateTo(first);
             },1500);
         },
 
@@ -69,8 +67,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
             sections.hide();
             $('#'+name.toLowerCase()).show();
             setTitle(name);
-            if(modules[name] && typeof modules[name].init == "function")
-                modules[name].init();
+            if(modules[name] && typeof modules[name].show == "function")
+                modules[name].show();
             scrollTop();
         },
 
@@ -163,7 +161,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
 $(function(){
     KIJ2013.init();
 });
-KIJ2013.Util = (function(){
+(function(){
     var randomColor = function(min,max){
             if(arguments.length < 2)
                 max = 255;
@@ -213,7 +211,7 @@ KIJ2013.Util = (function(){
             return string.slice(0,1).toUpperCase() + string.slice(1)
         };
 
-    return {
+    KIJ2013.Util = {
         randomColor: randomColor,
         filter: filter,
         sort: sort,
@@ -227,7 +225,7 @@ KIJ2013.Util = (function(){
         TABLE_NAME = 'news',
         store,
         fetching = false,
-        view = "list",
+        view = null,
 
     createDatabase = function() {
         store = new Lawnchair({name: TABLE_NAME},function(){});
@@ -271,13 +269,13 @@ KIJ2013.Util = (function(){
 
     onClickNewsItem = function(event)
     {
-        view = "item";
         var sender = $(event.target);
         displayNewsItem(sender.data('guid'));
     },
 
     displayNewsList = function()
     {
+        view = "list";
         KIJ2013.setActionBarUp();
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
@@ -313,8 +311,8 @@ KIJ2013.Util = (function(){
     },
 
     displayNewsItem = function(guid){
+        view = "item";
         KIJ2013.setActionBarUp(function(){
-            view = "list";
             displayNewsList();
         });
         store.get(guid, function(item){
@@ -330,11 +328,20 @@ KIJ2013.Util = (function(){
     init = function(){
         createDatabase();
         fetchItems();
+    },
+
+    show = function(){
         displayNewsList();
+    },
+
+    hide = function() {
+        view = null;
     };
 
     KIJ2013.Modules.News = {
-        init: init
+        init: init,
+        show: show,
+        hide: hide
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -347,6 +354,7 @@ KIJ2013.Util = (function(){
     var jsonURL = "events.json",
         TABLE_NAME = "events",
         store,
+        visible = false,
 
     /**
      * Create Database
@@ -376,7 +384,10 @@ KIJ2013.Util = (function(){
                 });
                 items.push(item);
             });
-            store.batch(items, function(){displayEventsList();});
+            store.batch(items, function(){
+                if(visible)
+                    displayEventsList();
+            });
         },"json").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Events: '+status);
         });
@@ -499,12 +510,22 @@ KIJ2013.Util = (function(){
 
     init = function() {
         createDatabase();
-        displayEventsList();
         fetchItems();
+    },
+
+    show = function(){
+        visible = true;
+        displayEventsList();
+    },
+
+    hide = function(){
+        visible = false;
     };
 
     KIJ2013.Modules.Events = {
-        init: init
+        init: init,
+        show: show,
+        hide: hide
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -534,7 +555,7 @@ KIJ2013.Util = (function(){
             return (lat-img_bounds[1])*yScale;
         },
 
-        init = function(){
+        show = function(){
             var gl = navigator.geolocation;
             if(!initialised){
                 img = $('#map img');
@@ -592,7 +613,7 @@ KIJ2013.Util = (function(){
         };
 
     KIJ2013.Modules.Map =  {
-        init: init,
+        show: show,
         moveTo: moveTo,
         mark: mark,
         unmark: unmark
@@ -605,25 +626,28 @@ KIJ2013.Util = (function(){
         url = 'http://176.227.210.187:8046/;stream=1',
 
     init = function(){
-        if(!loaded)
-        {
-            player = $('#player').jPlayer({
-                cssSelectorAncestor: "#controls",
-                nativeSupport: true,
-                ready: function(){
-                    player.jPlayer("setMedia", {mp3:url}).jPlayer('play');
-                },
-                swfPath: 'swf',
-                volume: 60,
-                errorAlerts: true
-            });
-            loaded = true;
-        }
+        player = $('#player').jPlayer({
+            cssSelectorAncestor: "#controls",
+            nativeSupport: true,
+            ready: function(){
+                player.jPlayer("setMedia", {mp3:url});
+                loaded = true;
+            },
+            swfPath: 'swf',
+            volume: 60,
+            errorAlerts: true
+        });
+    },
+
+    show = function(){
         KIJ2013.setTitle('Radio');
+        if(loaded)
+            player.jPlayer('play');
     };
 
     KIJ2013.Modules.Radio = {
-        init: init
+        init: init,
+        show: show
     };
 
 }(KIJ2013,jQuery));
@@ -719,6 +743,9 @@ KIJ2013.Util = (function(){
 
     init = function(){
         createDatabase();
+    },
+
+    show = function(){
         displayFoundList();
     },
 
@@ -749,6 +776,7 @@ KIJ2013.Util = (function(){
 
     KIJ2013.Modules.Learn = {
         init: init,
+        show: show,
         add: add,
         highlight: highlight
     };
@@ -772,26 +800,7 @@ KIJ2013.Util = (function(){
         // Normalise window URL
         win.URL ||
             (win.URL = win.webkitURL || win.msURL || win.oURL);
-        if(nav.getUserMedia){
-            if(!initialised){
-                nav.getUserMedia({video:true},
-                    function(stream) {
-                        // Display Preview
-                        video.src = createObjectURL(stream);
-                        // Keep reference to stream for snapshots
-                        localMediaStream = stream;
-                        initialised = true;
-                        start();
-                    },
-                    function(err) {
-                        console.log("Unable to get video stream!")
-                    }
-                );
-            }
-            else
-                start();
-        }
-        else
+        if(!nav.getUserMedia)
             KIJ2013.showError('Barcode Scanner is not available on your '
                 + 'platform.')
     },
@@ -821,6 +830,24 @@ KIJ2013.Util = (function(){
         clearInterval(interval);
     },
 
+    show = function() {
+        if(!initialised){
+            nav.getUserMedia({video:true},
+                function(stream) {
+                    // Display Preview
+                    video.src = createObjectURL(stream);
+                    // Keep reference to stream for snapshots
+                    localMediaStream = stream;
+                    initialised = true;
+                    start();
+                },
+                function(err) {
+                    console.log("Unable to get video stream!")
+                }
+            );
+        }
+    },
+
     hide = function(){
         stop();
     };
@@ -847,6 +874,7 @@ KIJ2013.Util = (function(){
 
     KIJ2013.Modules.Barcode = {
         init: init,
+        show: show,
         start: start,
         stop: stop,
         hide: hide

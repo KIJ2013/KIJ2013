@@ -30,20 +30,18 @@ var KIJ2013 = (function(window, $, Lawnchair){
                 if(!first)
                     first = module;
                 select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
+                if(typeof modules[module].init == "function")
+                    modules[module].init();
             }
             select.change(function(){
                 navigateTo(select.val());
             });
             popup = $('#popup');
             loading = $('#loading');
-            modules[first].init();
             setTimeout(function() {window.scrollTo(0, 1);}, 0);
             setTimeout(function(){
-                $('#splash').hide();
                 $('#action_bar').show();
-                var n = $('#news').show();
-                if(beingLoaded)
-                    beingLoaded = n;
+                navigateTo(first);
             },1500);
         },
 
@@ -69,8 +67,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
             sections.hide();
             $('#'+name.toLowerCase()).show();
             setTitle(name);
-            if(modules[name] && typeof modules[name].init == "function")
-                modules[name].init();
+            if(modules[name] && typeof modules[name].show == "function")
+                modules[name].show();
             scrollTop();
         },
 
@@ -163,7 +161,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
 $(function(){
     KIJ2013.init();
 });
-KIJ2013.Util = (function(){
+(function(){
     var randomColor = function(min,max){
             if(arguments.length < 2)
                 max = 255;
@@ -213,7 +211,7 @@ KIJ2013.Util = (function(){
             return string.slice(0,1).toUpperCase() + string.slice(1)
         };
 
-    return {
+    KIJ2013.Util = {
         randomColor: randomColor,
         filter: filter,
         sort: sort,

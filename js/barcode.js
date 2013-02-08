@@ -16,26 +16,7 @@
         // Normalise window URL
         win.URL ||
             (win.URL = win.webkitURL || win.msURL || win.oURL);
-        if(nav.getUserMedia){
-            if(!initialised){
-                nav.getUserMedia({video:true},
-                    function(stream) {
-                        // Display Preview
-                        video.src = createObjectURL(stream);
-                        // Keep reference to stream for snapshots
-                        localMediaStream = stream;
-                        initialised = true;
-                        start();
-                    },
-                    function(err) {
-                        console.log("Unable to get video stream!")
-                    }
-                );
-            }
-            else
-                start();
-        }
-        else
+        if(!nav.getUserMedia)
             KIJ2013.showError('Barcode Scanner is not available on your '
                 + 'platform.')
     },
@@ -65,6 +46,24 @@
         clearInterval(interval);
     },
 
+    show = function() {
+        if(!initialised){
+            nav.getUserMedia({video:true},
+                function(stream) {
+                    // Display Preview
+                    video.src = createObjectURL(stream);
+                    // Keep reference to stream for snapshots
+                    localMediaStream = stream;
+                    initialised = true;
+                    start();
+                },
+                function(err) {
+                    console.log("Unable to get video stream!")
+                }
+            );
+        }
+    },
+
     hide = function(){
         stop();
     };
@@ -91,6 +90,7 @@
 
     KIJ2013.Modules.Barcode = {
         init: init,
+        show: show,
         start: start,
         stop: stop,
         hide: hide

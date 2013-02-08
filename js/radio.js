@@ -4,25 +4,28 @@
         url = 'http://176.227.210.187:8046/;stream=1',
 
     init = function(){
-        if(!loaded)
-        {
-            player = $('#player').jPlayer({
-                cssSelectorAncestor: "#controls",
-                nativeSupport: true,
-                ready: function(){
-                    player.jPlayer("setMedia", {mp3:url}).jPlayer('play');
-                },
-                swfPath: 'swf',
-                volume: 60,
-                errorAlerts: true
-            });
-            loaded = true;
-        }
+        player = $('#player').jPlayer({
+            cssSelectorAncestor: "#controls",
+            nativeSupport: true,
+            ready: function(){
+                player.jPlayer("setMedia", {mp3:url});
+                loaded = true;
+            },
+            swfPath: 'swf',
+            volume: 60,
+            errorAlerts: true
+        });
+    },
+
+    show = function(){
         KIJ2013.setTitle('Radio');
+        if(loaded)
+            player.jPlayer('play');
     };
 
     KIJ2013.Modules.Radio = {
-        init: init
+        init: init,
+        show: show
     };
 
 }(KIJ2013,jQuery));

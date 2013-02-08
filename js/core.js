@@ -5,8 +5,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
         beingLoaded,
         popup,
         store,
-        sections = ["news","events","map","radio","learn","barcode","settings"],
-        self,
+        modules = {},
 
         /**
          * Initialise KIJ2013 objects, databases and preferences
@@ -24,19 +23,21 @@ var KIJ2013 = (function(window, $, Lawnchair){
                 });
             });
             setActionBarUp();
-            var i = 0,
-                select = $('#action_bar select');
+            var select = $('#action_bar select'),
+                first = false;
             select.empty();
-            for(;i < sections.length; i++)
-                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+            for(module in modules){
+                if(!first)
+                    first = module;
+                select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
+            }
             select.change(function(){
-                navigateTo($(this).val());
+                navigateTo(select.val());
             });
             popup = $('#popup');
             loading = $('#loading');
-            self.News.init();
+            modules[first].init();
             setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            //KIJ2013.navigateTo("News");
             setTimeout(function(){
                 $('#splash').hide();
                 $('#action_bar').show();
@@ -61,16 +62,15 @@ var KIJ2013 = (function(window, $, Lawnchair){
             var sections = $('section:visible'),
                 nm;
             $.each(sections, function(i,item){
-                nm = $(item).attr('id');
-                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
-                if(self[nm] && typeof self[nm].hide == "function")
-                    self[nm].hide();
+                nm = KIJ2013.Util.ucfirst($(item).attr('id'));
+                if(modules[nm] && typeof modules[nm].hide == "function")
+                    modules[nm].hide();
             })
             sections.hide();
             $('#'+name.toLowerCase()).show();
             setTitle(name);
-            if(self[name] && typeof self[name].init == "function")
-                self[name].init();
+            if(modules[name] && typeof modules[name].init == "function")
+                modules[name].init();
             scrollTop();
         },
 
@@ -145,7 +145,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
     /*
      * Export public API functions
      */
-    self = {
+    return {
         getPreference: getPreference,
         hideLoading: hideLoading,
         init: init,
@@ -155,10 +155,10 @@ var KIJ2013 = (function(window, $, Lawnchair){
         setPreference: setPreference,
         setTitle: setTitle,
         showError: showError,
-        showLoading: showLoading
+        showLoading: showLoading,
+        Modules: modules
     };
 
-    return self;
 }(window,jQuery,Lawnchair));
 $(function(){
     KIJ2013.init();
@@ -207,12 +207,17 @@ KIJ2013.Util = (function(){
                 }
             }
             return out;
+        },
+
+        ucfirst = function(string){
+            return string.slice(0,1).toUpperCase() + string.slice(1)
         };
 
     return {
         randomColor: randomColor,
         filter: filter,
         sort: sort,
-        merge: merge
+        merge: merge,
+        ucfirst: ucfirst
     };
 }());

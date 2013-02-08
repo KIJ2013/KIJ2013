@@ -1,10 +1,9 @@
-KIJ2013.Radio = (function(KIJ2013,$){
+(function(KIJ2013,$){
     var loaded = false,
         player,
         url = 'http://176.227.210.187:8046/;stream=1',
-        self = {};
 
-    self.init = function(){
+    init = function(){
         if(!loaded)
         {
             player = $('#player').jPlayer({
@@ -22,5 +21,8 @@ KIJ2013.Radio = (function(KIJ2013,$){
         KIJ2013.setTitle('Radio');
     };
 
-    return self;
+    KIJ2013.Modules.Radio = {
+        init: init
+    };
+
 }(KIJ2013,jQuery));

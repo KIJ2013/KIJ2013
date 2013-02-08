@@ -1,4 +1,4 @@
-KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
+(function(KIJ2013, $, Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -9,9 +9,8 @@ KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
         TABLE_PREFS = "preferences",
         subcamp_el,
         initialised = false,
-        self = {};
 
-    self.init = function() {
+    init = function() {
         if(!initialised){
             subcamp_el = $('#subcamp');
             subcamp_el.val(KIJ2013.getPreference('subcamp'))
@@ -47,5 +46,9 @@ KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
             initialised = true;
         }
     }
-    return self;
+
+    KIJ2013.Modules.Settings = {
+        init: init
+    };
+
 }(KIJ2013, jQuery, Lawnchair));

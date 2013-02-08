@@ -1,4 +1,4 @@
-KIJ2013.Barcode = (function(KIJ2013,win,nav){
+(function(KIJ2013,win,nav){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
@@ -25,7 +25,7 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                         // Keep reference to stream for snapshots
                         localMediaStream = stream;
                         initialised = true;
-                        KIJ2013.Barcode.start();
+                        start();
                     },
                     function(err) {
                         console.log("Unable to get video stream!")
@@ -33,7 +33,7 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                 );
             }
             else
-                KIJ2013.Barcode.start();
+                start();
         }
         else
             KIJ2013.showError('Barcode Scanner is not available on your '
@@ -66,10 +66,8 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
     },
 
     hide = function(){
-        KIJ2013.Barcode.stop();
-    },
-
-    self;
+        stop();
+    };
 
     if(qr){
         // Set callback for detection of QR Code
@@ -79,24 +77,23 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                 var id = a.slice(26);
                 if(a.slice(0,26) == "http://kij13.org.uk/learn/")
                 {
-                    KIJ2013.Barcode.stop();
-                    KIJ2013.Learn.add(id);
+                    stop();
+                    KIJ2013.Modules.Learn.add(id);
                     alert("Congratulations you found an item.");
                     KIJ2013.navigateTo('Learn');
-                    KIJ2013.Learn.highlight(id);
+                    KIJ2013.Modules.Learn.highlight(id);
                 }
                 else
                     alert(a);
             }
         };
-    }
+    };
 
-    self = {
+    KIJ2013.Modules.Barcode = {
         init: init,
         start: start,
         stop: stop,
         hide: hide
     };
 
-    return self;
 }(KIJ2013,window,navigator));

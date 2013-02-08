@@ -1,4 +1,4 @@
-KIJ2013.Map = (function(KIJ2013,$,navigator){
+(function(KIJ2013,$,navigator){
     var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
         51.305519711648124],
         img_size = [2516,1867],
@@ -34,7 +34,7 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
                     img = $('<img />').attr('src', "img/map.png")
                         .appendTo('#map').load(
                         function(){
-                            KIJ2013.Map.moveTo(51.3015, 0.584);
+                            moveTo(51.3015, 0.584);
                             KIJ2013.hideLoading();
                         });
                 }
@@ -42,15 +42,15 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
                 initialised = true;
             }
             else
-                KIJ2013.Map.moveTo(51.3015, 0.584);
+                moveTo(51.3015, 0.584);
             if(gl)
             {
                 gl.getCurrentPosition(function(position){
                     var coords = position.coords,
                         lat = coords.latitude,
                         lon = coords.longitude;
-                    KIJ2013.Map.mark(lat, lon);
-                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+                    mark(lat, lon);
+                    setTimeout(function(){moveTo(lat, lon)},2);
                 }, function(){KIJ2013.showError('Error Finding Location')});
             }
         },
@@ -79,14 +79,13 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
 
         unmark = function(){
             marker.css({display: 'none'});
-        },
-
-        self = {
-            init: init,
-            moveTo: moveTo,
-            mark: mark,
-            unmark: unmark
         };
 
-    return self;
-}(KIJ2013,$,navigator));
+    KIJ2013.Modules.Map =  {
+        init: init,
+        moveTo: moveTo,
+        mark: mark,
+        unmark: unmark
+    };
+
+}(KIJ2013,jQuery,navigator));

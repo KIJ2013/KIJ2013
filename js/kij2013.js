@@ -5,8 +5,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
         beingLoaded,
         popup,
         store,
-        sections = ["news","events","map","radio","learn","barcode","settings"],
-        self,
+        modules = {},
 
         /**
          * Initialise KIJ2013 objects, databases and preferences
@@ -24,19 +23,21 @@ var KIJ2013 = (function(window, $, Lawnchair){
                 });
             });
             setActionBarUp();
-            var i = 0,
-                select = $('#action_bar select');
+            var select = $('#action_bar select'),
+                first = false;
             select.empty();
-            for(;i < sections.length; i++)
-                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+            for(module in modules){
+                if(!first)
+                    first = module;
+                select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
+            }
             select.change(function(){
-                navigateTo($(this).val());
+                navigateTo(select.val());
             });
             popup = $('#popup');
             loading = $('#loading');
-            self.News.init();
+            modules[first].init();
             setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            //KIJ2013.navigateTo("News");
             setTimeout(function(){
                 $('#splash').hide();
                 $('#action_bar').show();
@@ -61,16 +62,15 @@ var KIJ2013 = (function(window, $, Lawnchair){
             var sections = $('section:visible'),
                 nm;
             $.each(sections, function(i,item){
-                nm = $(item).attr('id');
-                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
-                if(self[nm] && typeof self[nm].hide == "function")
-                    self[nm].hide();
+                nm = KIJ2013.Util.ucfirst($(item).attr('id'));
+                if(modules[nm] && typeof modules[nm].hide == "function")
+                    modules[nm].hide();
             })
             sections.hide();
             $('#'+name.toLowerCase()).show();
             setTitle(name);
-            if(self[name] && typeof self[name].init == "function")
-                self[name].init();
+            if(modules[name] && typeof modules[name].init == "function")
+                modules[name].init();
             scrollTop();
         },
 
@@ -145,7 +145,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
     /*
      * Export public API functions
      */
-    self = {
+    return {
         getPreference: getPreference,
         hideLoading: hideLoading,
         init: init,
@@ -155,10 +155,10 @@ var KIJ2013 = (function(window, $, Lawnchair){
         setPreference: setPreference,
         setTitle: setTitle,
         showError: showError,
-        showLoading: showLoading
+        showLoading: showLoading,
+        Modules: modules
     };
 
-    return self;
 }(window,jQuery,Lawnchair));
 $(function(){
     KIJ2013.init();
@@ -207,16 +207,21 @@ KIJ2013.Util = (function(){
                 }
             }
             return out;
+        },
+
+        ucfirst = function(string){
+            return string.slice(0,1).toUpperCase() + string.slice(1)
         };
 
     return {
         randomColor: randomColor,
         filter: filter,
         sort: sort,
-        merge: merge
+        merge: merge,
+        ucfirst: ucfirst
     };
 }());
-KIJ2013.News = (function(KIJ2013,$,Lawnchair){
+(function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
         TABLE_NAME = 'news',
@@ -322,17 +327,18 @@ KIJ2013.News = (function(KIJ2013,$,Lawnchair){
         });
     },
 
-    self = {};
-
-    self.init = function(){
+    init = function(){
         createDatabase();
         fetchItems();
         displayNewsList();
     };
 
-    return self;
+    KIJ2013.Modules.News = {
+        init: init
+    };
+
 }(KIJ2013,jQuery,Lawnchair));
-KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
+(function(KIJ2013,$,Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -491,17 +497,18 @@ KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
         });
     },
 
-    self = {};
-
-    self.init = function() {
+    init = function() {
         createDatabase();
         displayEventsList();
         fetchItems();
     };
 
-    return self;
+    KIJ2013.Modules.Events = {
+        init: init
+    };
+
 }(KIJ2013,jQuery,Lawnchair));
-KIJ2013.Map = (function(KIJ2013,$,navigator){
+(function(KIJ2013,$,navigator){
     var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
         51.305519711648124],
         img_size = [2516,1867],
@@ -537,7 +544,7 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
                     img = $('<img />').attr('src', "img/map.png")
                         .appendTo('#map').load(
                         function(){
-                            KIJ2013.Map.moveTo(51.3015, 0.584);
+                            moveTo(51.3015, 0.584);
                             KIJ2013.hideLoading();
                         });
                 }
@@ -545,15 +552,15 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
                 initialised = true;
             }
             else
-                KIJ2013.Map.moveTo(51.3015, 0.584);
+                moveTo(51.3015, 0.584);
             if(gl)
             {
                 gl.getCurrentPosition(function(position){
                     var coords = position.coords,
                         lat = coords.latitude,
                         lon = coords.longitude;
-                    KIJ2013.Map.mark(lat, lon);
-                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+                    mark(lat, lon);
+                    setTimeout(function(){moveTo(lat, lon)},2);
                 }, function(){KIJ2013.showError('Error Finding Location')});
             }
         },
@@ -582,24 +589,22 @@ KIJ2013.Map = (function(KIJ2013,$,navigator){
 
         unmark = function(){
             marker.css({display: 'none'});
-        },
-
-        self = {
-            init: init,
-            moveTo: moveTo,
-            mark: mark,
-            unmark: unmark
         };
 
-    return self;
-}(KIJ2013,$,navigator));
-KIJ2013.Radio = (function(KIJ2013,$){
+    KIJ2013.Modules.Map =  {
+        init: init,
+        moveTo: moveTo,
+        mark: mark,
+        unmark: unmark
+    };
+
+}(KIJ2013,jQuery,navigator));
+(function(KIJ2013,$){
     var loaded = false,
         player,
         url = 'http://176.227.210.187:8046/;stream=1',
-        self = {};
 
-    self.init = function(){
+    init = function(){
         if(!loaded)
         {
             player = $('#player').jPlayer({
@@ -617,9 +622,12 @@ KIJ2013.Radio = (function(KIJ2013,$){
         KIJ2013.setTitle('Radio');
     };
 
-    return self;
+    KIJ2013.Modules.Radio = {
+        init: init
+    };
+
 }(KIJ2013,jQuery));
-KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
+(function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
@@ -737,17 +745,16 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
         }
         else
             highlighted_item = id;
-    },
+    };
 
-    self = {
+    KIJ2013.Modules.Learn = {
         init: init,
         add: add,
         highlight: highlight
     };
 
-    return self;
 }(KIJ2013,jQuery,Lawnchair));
-KIJ2013.Barcode = (function(KIJ2013,win,nav){
+(function(KIJ2013,win,nav){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
@@ -774,7 +781,7 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                         // Keep reference to stream for snapshots
                         localMediaStream = stream;
                         initialised = true;
-                        KIJ2013.Barcode.start();
+                        start();
                     },
                     function(err) {
                         console.log("Unable to get video stream!")
@@ -782,7 +789,7 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                 );
             }
             else
-                KIJ2013.Barcode.start();
+                start();
         }
         else
             KIJ2013.showError('Barcode Scanner is not available on your '
@@ -815,10 +822,8 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
     },
 
     hide = function(){
-        KIJ2013.Barcode.stop();
-    },
-
-    self;
+        stop();
+    };
 
     if(qr){
         // Set callback for detection of QR Code
@@ -828,28 +833,27 @@ KIJ2013.Barcode = (function(KIJ2013,win,nav){
                 var id = a.slice(26);
                 if(a.slice(0,26) == "http://kij13.org.uk/learn/")
                 {
-                    KIJ2013.Barcode.stop();
-                    KIJ2013.Learn.add(id);
+                    stop();
+                    KIJ2013.Modules.Learn.add(id);
                     alert("Congratulations you found an item.");
                     KIJ2013.navigateTo('Learn');
-                    KIJ2013.Learn.highlight(id);
+                    KIJ2013.Modules.Learn.highlight(id);
                 }
                 else
                     alert(a);
             }
         };
-    }
+    };
 
-    self = {
+    KIJ2013.Modules.Barcode = {
         init: init,
         start: start,
         stop: stop,
         hide: hide
     };
 
-    return self;
 }(KIJ2013,window,navigator));
-KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
+(function(KIJ2013, $, Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -860,9 +864,8 @@ KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
         TABLE_PREFS = "preferences",
         subcamp_el,
         initialised = false,
-        self = {};
 
-    self.init = function() {
+    init = function() {
         if(!initialised){
             subcamp_el = $('#subcamp');
             subcamp_el.val(KIJ2013.getPreference('subcamp'))
@@ -898,5 +901,9 @@ KIJ2013.Settings = (function(KIJ2013, $, Lawnchair){
             initialised = true;
         }
     }
-    return self;
+
+    KIJ2013.Modules.Settings = {
+        init: init
+    };
+
 }(KIJ2013, jQuery, Lawnchair));

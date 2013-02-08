@@ -1,4 +1,4 @@
-KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
+(function(KIJ2013,$,Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -157,13 +157,14 @@ KIJ2013.Events = (function(KIJ2013,$,Lawnchair){
         });
     },
 
-    self = {};
-
-    self.init = function() {
+    init = function() {
         createDatabase();
         displayEventsList();
         fetchItems();
     };
 
-    return self;
+    KIJ2013.Modules.Events = {
+        init: init
+    };
+
 }(KIJ2013,jQuery,Lawnchair));

@@ -1,4 +1,4 @@
-KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
+(function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
@@ -116,13 +116,12 @@ KIJ2013.Learn = (function(KIJ2013,$,Lawnchair){
         }
         else
             highlighted_item = id;
-    },
+    };
 
-    self = {
+    KIJ2013.Modules.Learn = {
         init: init,
         add: add,
         highlight: highlight
     };
 
-    return self;
 }(KIJ2013,jQuery,Lawnchair));

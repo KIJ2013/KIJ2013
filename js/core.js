@@ -66,7 +66,10 @@ var KIJ2013 = (function(window, $, Lawnchair){
          * Load settings from configured source
          */
         loadSettings = function(){
-            $.getJSON(settings.settingsURL || default_settings_url, function(json){
+            var urls = settings.settingsURL.push ?
+                    settings.settingsURL.slice() : [settings.settingsURL];
+            urls.push(default_settings_url);
+            KIJ2013.Util.loadFirst(urls, function(json){
                 json.key = settings_key;
                 settings = json;
                 store.save(settings);
@@ -268,6 +271,30 @@ $(function(){
 
         ucfirst = function(string){
             return string.slice(0,1).toUpperCase() + string.slice(1)
+        },
+
+        /**
+         * Load each URL in turn until one succeeds
+         * @param string[] urls Array of urls to try
+         * @param function callback Function to be called once successful
+         * @param string type Expected dataType, defaults to 'json'
+         */
+        loadFirst = function(urls, callback, type){
+            var l = urls.length,
+                e = function(){
+                    if(i<l){
+                        f(i+1);
+                    }
+                },
+                f = function(i){
+                    $.ajax({
+                        url: urls[i],
+                        dataType: type || 'json',
+                        success: callback,
+                        error: e
+                    });
+                };
+            f(0);
         };
 
     KIJ2013.Util = {
@@ -275,6 +302,7 @@ $(function(){
         filter: filter,
         sort: sort,
         merge: merge,
-        ucfirst: ucfirst
+        ucfirst: ucfirst,
+        loadFirst: loadFirst
     };
 }());

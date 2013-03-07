@@ -1,6 +1,8 @@
 var KIJ2013 = (function(window, $, Lawnchair){
-    var preferences = {key:"preferences"},
-        TABLE_PREFERENCES = "preferences",
+    var store_name = "core",
+        preferences_key = "preferences",
+        settings_key = "settings",
+        default_settings_url = "settings.json",
         loading,
         beingLoaded,
         popup,
@@ -13,15 +15,30 @@ var KIJ2013 = (function(window, $, Lawnchair){
          *   preferences have finished loading.
          */
         init = function(callback){
-            store = Lawnchair({name: TABLE_PREFERENCES}, function(){
-                this.get("preferences", function(pref){
+            // Load preferences from store
+            store = Lawnchair({name: store_name}, function(){
+                var both = false;
+                this.get(preferences_key, function(pref){
                     if(pref)
                         preferences = pref;
-                    if(typeof callback == "function"){
+                    if(both && typeof callback == "function"){
                         callback();
                     }
+                    both = true;
+                });
+                this.get(settings_key, function(sett){
+                    if(sett)
+                        settings = sett;
+
+                    loadSettings();
+
+                    if(both && typeof callback == "function"){
+                        callback();
+                    }
+                    both = true;
                 });
             });
+
             setActionBarUp();
             var select = $('#action_bar select'),
                 first = false;
@@ -45,15 +62,55 @@ var KIJ2013 = (function(window, $, Lawnchair){
             },1500);
         },
 
+        /**
+         * Load settings from configured source
+         */
+        loadSettings = function(){
+            $.getJSON(settings.settingsURL || default_settings_url, function(json){
+                json.key = settings_key;
+                settings = json;
+                store.save(settings);
+            });
+        },
+
+        defaultSettings = function(){
+            return {key: settings_key, settingsURL: default_settings_url};
+        },
+        settings = defaultSettings(),
+
+        defaultPreferences = function(){
+            return {key: preferences_key};
+        },
+        preferences = defaultPreferences(),
+
         getPreference = function(name, def){
             return preferences[name] || def || null;
         },
 
         setPreference = function(name, value)
         {
-            if(name == "key") return;
+            // Do not allow overriding key
+            if(name == "key"){ return; }
+
             preferences[name] = value;
             store.save(preferences);
+        },
+
+        clearPreferences = function(callback){
+            preferences = defaultPreferences();
+            store.save(preferences, callback);
+        },
+
+        clearCaches = function(callback){
+            settings = defaultSettings();
+            store.save(settings, callback);
+            loadSettings();
+
+            // Callback should be delayed until modules have finished clearing
+            for(module in modules){
+                if(modules[module].clearCache)
+                    modules[module].clearCache();
+            }
         },
 
         navigateTo = function(name) {
@@ -144,6 +201,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
      * Export public API functions
      */
     return {
+        clearCaches: clearCaches,
+        clearPreferences: clearPreferences,
         getPreference: getPreference,
         hideLoading: hideLoading,
         init: init,

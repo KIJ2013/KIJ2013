@@ -3,11 +3,7 @@
     /**
      * PRIVATE Variables
      */
-    var TABLE_NEWS = "news",
-        TABLE_EVENTS = "events",
-        TABLE_LEARN = "learn",
-        TABLE_PREFS = "preferences",
-        subcamp_el,
+    var subcamp_el,
         initialised = false,
 
     init = function() {
@@ -19,26 +15,10 @@
                 KIJ2013.setPreference("subcamp", val);
             });
             $('#clear-cache').click(function(){
-                var all_done = 0;
-                Lawnchair({name: TABLE_NEWS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_EVENTS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_LEARN}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
+                KIJ2013.clearCaches(function(){alert('Cache Cleared');});
             });
             $('#clear-preferences').click(function(){
-                Lawnchair({name: TABLE_PREFS}, function(){
-                    this.nuke();
+                KIJ2013.clearPreferences(function(){
                     subcamp_el.val('');
                     alert("Preferences Cleared");
                 });

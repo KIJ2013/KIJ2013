@@ -119,13 +119,18 @@
         }
         else
             highlighted_item = id;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Learn = {
         init: init,
         show: show,
         add: add,
-        highlight: highlight
+        highlight: highlight,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));

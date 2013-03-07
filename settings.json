@@ -1,19 +1,19 @@
 {
-	"settings": "http://ijmacd.com/kij2013/settings.json",
+	"settingsURL": "http://ijmacd.com/kij2013/settings.json",
 	"modules": {
 		"news": {
-			"rss": ["http://www.kij13.org.uk/category/latest-news/feed/","feed.php?f=news.rss"]
+			"rssURL": ["http://www.kij13.org.uk/category/latest-news/feed/","feed.php?f=news.rss"]
 		},
 		"events": {
-			"rss": ["http://www.kij13.org.uk/category/events/feed/","events.json"]
+			"rssURL": ["http://www.kij13.org.uk/category/events/feed/","events.json"]
 		},
 		"map": {
-			"image": "img/map.png",
-			"image_size": [2516,1867],
-			"image_bounds": [0.5785846710205073,51.299361979488744,0.5925965309143088,51.305519711648124]
+			"imageURL": "img/map.png",
+			"imageSize": [2516,1867],
+			"imageBounds": [0.5785846710205073,51.299361979488744,0.5925965309143088,51.305519711648124]
 		},
 		"radio": {
-			"stream": ["http://176.227.210.187:8046/;stream=1"]
+			"streamURL": ["http://176.227.210.187:8046/;stream=1"]
 		}
 	}
 }

@@ -173,12 +173,17 @@
 
     hide = function(){
         visible = false;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Events = {
         init: init,
         show: show,
-        hide: hide
+        hide: hide,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));

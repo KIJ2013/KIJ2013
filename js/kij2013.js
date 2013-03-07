@@ -1,19 +1,18 @@
-var KIJ2013 = function(){
+var KIJ2013 = (function(window, $, Lawnchair){
     var preferences = {key:"preferences"},
         TABLE_PREFERENCES = "preferences",
         loading,
         beingLoaded,
         popup,
         store,
-        sections = ["news","events","map","radio","learn","barcode","settings"];
+        modules = {},
 
-    return {
         /**
          * Initialise KIJ2013 objects, databases and preferences
          * @param callback Allows a callack to be attached which fires when
          *   preferences have finished loading.
          */
-        init: function(callback){
+        init = function(callback){
             store = Lawnchair({name: TABLE_PREFERENCES}, function(){
                 this.get("preferences", function(pref){
                     if(pref)
@@ -23,54 +22,57 @@ var KIJ2013 = function(){
                     }
                 });
             });
-            KIJ2013.setActionBarUp();
-            var i = 0,
-                select = $('#action_bar select');
+            setActionBarUp();
+            var select = $('#action_bar select'),
+                first = false;
             select.empty();
-            for(;i < sections.length; i++)
-                select.append("<option>"+sections[i].slice(0,1).toUpperCase() + sections[i].slice(1)+"</option>");
+            for(module in modules){
+                if(!first)
+                    first = module;
+                select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
+                if(typeof modules[module].init == "function")
+                    modules[module].init();
+            }
             select.change(function(){
-                KIJ2013.navigateTo($(this).val());
+                navigateTo(select.val());
             });
             popup = $('#popup');
             loading = $('#loading');
-            KIJ2013.News.init();
             setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            //KIJ2013.navigateTo("News");
             setTimeout(function(){
-                $('#splash').hide();
                 $('#action_bar').show();
-                var n = $('#news').show();
-                if(beingLoaded)
-                    beingLoaded = n;
+                navigateTo(first);
             },1500);
         },
-        getPreference: function(name, def){
+
+        getPreference = function(name, def){
             return preferences[name] || def || null;
         },
-        setPreference: function(name, value)
+
+        setPreference = function(name, value)
         {
             if(name == "key") return;
             preferences[name] = value;
             store.save(preferences);
         },
-        navigateTo: function(name) {
+
+        navigateTo = function(name) {
             var sections = $('section:visible'),
                 nm;
             $.each(sections, function(i,item){
-                nm = $(item).attr('id');
-                nm = nm.slice(0,1).toUpperCase() + nm.slice(1);
-                if(KIJ2013[nm] && typeof KIJ2013[nm].hide == "function")
-                    KIJ2013[nm].hide();
+                nm = KIJ2013.Util.ucfirst($(item).attr('id'));
+                if(modules[nm] && typeof modules[nm].hide == "function")
+                    modules[nm].hide();
             })
             sections.hide();
             $('#'+name.toLowerCase()).show();
-            KIJ2013.setTitle(name);
-            if(KIJ2013[name] && typeof KIJ2013[name].init == "function")
-                KIJ2013[name].init();
-            KIJ2013.scrollTop();
+            setTitle(name);
+            if(modules[name] && typeof modules[name].show == "function")
+                modules[name].show();
+            scrollTop();
         },
-        setActionBarUp: function(fn)
+
+        setActionBarUp = function(fn)
         {
             if(typeof fn == "function")
             {
@@ -83,7 +85,7 @@ var KIJ2013 = function(){
             else if(typeof fn == "string")
             {
                 $('#up-button').unbind().click(function(){
-                    KIJ2013.navigateTo(fn);
+                    navigateTo(fn);
                     return false;
                 });
                 $('#up-icon').css('visibility', 'visible');
@@ -91,14 +93,16 @@ var KIJ2013 = function(){
             else if(typeof fn == "undefined")
                 $('#up-icon').css('visibility', 'hidden');
         },
-        setTitle: function(title)
+
+        setTitle = function(title)
         {
             var blank = typeof title == "undefined" || title == "",
                 default_title = "KIJ2013";
             $('title').text(blank ? default_title : default_title + " - " + title);
             $('#action_bar h1').text(blank ? default_title : title);
         },
-        showLoading: function()
+
+        showLoading = function()
         {
             if(loading.length == 0)
             {
@@ -110,7 +114,8 @@ var KIJ2013 = function(){
             beingLoaded = $('section:visible').hide();
             loading.show();
         },
-        hideLoading: function(){
+
+        hideLoading = function(){
             if(loading)
                 loading.hide();
             if(beingLoaded){
@@ -118,7 +123,8 @@ var KIJ2013 = function(){
                 beingLoaded = null;
             }
         },
-        showError: function(message)
+
+        showError = function(message)
         {
             if(popup.length == 0)
             {
@@ -129,14 +135,34 @@ var KIJ2013 = function(){
                 popup.slideUp('normal')
             },5000);
         },
-        scrollTop: function(){
+
+        scrollTop = function(){
             window.scrollTo(0,1);
-        }
-    }
-}();
-KIJ2013.Util = function(){
+        };
+
+    /*
+     * Export public API functions
+     */
     return {
-        randomColor: function(min,max){
+        getPreference: getPreference,
+        hideLoading: hideLoading,
+        init: init,
+        navigateTo: navigateTo,
+        scrollTop: scrollTop,
+        setActionBarUp: setActionBarUp,
+        setPreference: setPreference,
+        setTitle: setTitle,
+        showError: showError,
+        showLoading: showLoading,
+        Modules: modules
+    };
+
+}(window,jQuery,Lawnchair));
+$(function(){
+    KIJ2013.init();
+});
+(function(){
+    var randomColor = function(min,max){
             if(arguments.length < 2)
                 max = 255;
             if(arguments.length < 1)
@@ -145,7 +171,8 @@ KIJ2013.Util = function(){
                 ((max-min)*Math.random()+min).toFixed()+","+
                 ((max-min)*Math.random()+min).toFixed()+")";
         },
-        filter: function(field, value, condition, primer){
+
+        filter = function(field, value, condition, primer){
             var key = function (x) {return primer ? primer(x[field]) : x[field]};
             value = arguments.length == 2 ? arguments[1] : arguments[2];
             condition = arguments.length == 2 ? "=" : arguments[1];
@@ -157,7 +184,8 @@ KIJ2013.Util = function(){
                     );
             }
         },
-        sort: function(field, reverse, primer){
+
+        sort = function(field, reverse, primer){
             var key = function (x) {return primer ? primer(x[field]) : x[field]};
             reverse = typeof reverse == "undefined" || reverse;
             return function (a,b) {
@@ -165,7 +193,8 @@ KIJ2013.Util = function(){
                 return (A < B ? -1 : (A > B ? +1 : 0)) * [-1,1][+!!reverse];
             }
         },
-        merge: function(/* variable number of arrays */){
+
+        merge = function(/* variable number of arrays */){
             var out = [], array, count, len, i, j;
             for(i = 0, count = arguments.length; i < count; i++){
                 array = arguments[i];
@@ -176,24 +205,27 @@ KIJ2013.Util = function(){
                 }
             }
             return out;
-        }
-    }
-}();
-KIJ2013.Menu = function(){
-    return {
-        init: function(){
-            KIJ2013.setActionBarUp();
-            KIJ2013.setTitle();
-        }
-    }
-}();
-KIJ2013.News = function(){
+        },
+
+        ucfirst = function(string){
+            return string.slice(0,1).toUpperCase() + string.slice(1)
+        };
+
+    KIJ2013.Util = {
+        randomColor: randomColor,
+        filter: filter,
+        sort: sort,
+        merge: merge,
+        ucfirst: ucfirst
+    };
+}());
+(function(KIJ2013,$,Lawnchair){
     //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
     var rssURL = "feed.php?f=news.rss",
         TABLE_NAME = 'news',
         store,
         fetching = false,
-        view = "list",
+        view = null,
 
     createDatabase = function() {
         store = new Lawnchair({name: TABLE_NAME},function(){});
@@ -237,13 +269,13 @@ KIJ2013.News = function(){
 
     onClickNewsItem = function(event)
     {
-        view = "item";
         var sender = $(event.target);
         displayNewsItem(sender.data('guid'));
     },
 
     displayNewsList = function()
     {
+        view = "list";
         KIJ2013.setActionBarUp();
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
@@ -279,8 +311,8 @@ KIJ2013.News = function(){
     },
 
     displayNewsItem = function(guid){
+        view = "item";
         KIJ2013.setActionBarUp(function(){
-            view = "list";
             displayNewsList();
         });
         store.get(guid, function(item){
@@ -291,17 +323,29 @@ KIJ2013.News = function(){
             $('#news').empty().append(content);
             KIJ2013.scrollTop();
         });
+    },
+
+    init = function(){
+        createDatabase();
+        fetchItems();
+    },
+
+    show = function(){
+        displayNewsList();
+    },
+
+    hide = function() {
+        view = null;
     };
 
-    return {
-        init: function(){
-            createDatabase();
-            fetchItems();
-            displayNewsList();
-        }
-    }
-}();
-KIJ2013.Events = function(){
+    KIJ2013.Modules.News = {
+        init: init,
+        show: show,
+        hide: hide
+    };
+
+}(KIJ2013,jQuery,Lawnchair));
+(function(KIJ2013,$,Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -310,6 +354,7 @@ KIJ2013.Events = function(){
     var jsonURL = "events.json",
         TABLE_NAME = "events",
         store,
+        visible = false,
 
     /**
      * Create Database
@@ -339,7 +384,10 @@ KIJ2013.Events = function(){
                 });
                 items.push(item);
             });
-            store.batch(items, function(){displayEventsList();});
+            store.batch(items, function(){
+                if(visible)
+                    displayEventsList();
+            });
         },"json").error(function(jqXHR,status,error){
             KIJ2013.showError('Error Fetching Events: '+status);
         });
@@ -458,17 +506,30 @@ KIJ2013.Events = function(){
                 $('#events').append(content);
             }
         });
+    },
+
+    init = function() {
+        createDatabase();
+        fetchItems();
+    },
+
+    show = function(){
+        visible = true;
+        displayEventsList();
+    },
+
+    hide = function(){
+        visible = false;
     };
 
-    return {
-        init: function() {
-            createDatabase();
-            displayEventsList();
-            fetchItems();
-        }
-    }
-}();
-KIJ2013.Map = function(){
+    KIJ2013.Modules.Events = {
+        init: init,
+        show: show,
+        hide: hide
+    };
+
+}(KIJ2013,jQuery,Lawnchair));
+(function(KIJ2013,$,navigator){
     var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
         51.305519711648124],
         img_size = [2516,1867],
@@ -492,9 +553,9 @@ KIJ2013.Map = function(){
             if(lat>img_bounds[3])
                 throw "OutOfBounds";
             return (lat-img_bounds[1])*yScale;
-        };
-    return {
-        init: function(){
+        },
+
+        show = function(){
             var gl = navigator.geolocation;
             if(!initialised){
                 img = $('#map img');
@@ -504,7 +565,7 @@ KIJ2013.Map = function(){
                     img = $('<img />').attr('src', "img/map.png")
                         .appendTo('#map').load(
                         function(){
-                            KIJ2013.Map.moveTo(51.3015, 0.584);
+                            moveTo(51.3015, 0.584);
                             KIJ2013.hideLoading();
                         });
                 }
@@ -512,19 +573,20 @@ KIJ2013.Map = function(){
                 initialised = true;
             }
             else
-                KIJ2013.Map.moveTo(51.3015, 0.584);
+                moveTo(51.3015, 0.584);
             if(gl)
             {
                 gl.getCurrentPosition(function(position){
                     var coords = position.coords,
                         lat = coords.latitude,
                         lon = coords.longitude;
-                    KIJ2013.Map.mark(lat, lon);
-                    setTimeout(function(){KIJ2013.Map.moveTo(lat, lon)},2);
+                    mark(lat, lon);
+                    setTimeout(function(){moveTo(lat, lon)},2);
                 }, function(){KIJ2013.showError('Error Finding Location')});
             }
         },
-        moveTo: function(lat, lon)
+
+        moveTo = function(lat, lon)
         {
             try {
                 var win = $(window),
@@ -536,7 +598,8 @@ KIJ2013.Map = function(){
             }
             catch (e){}
         },
-        mark: function(lat, lon)
+
+        mark = function(lat, lon)
         {
             try {
                 marker.css({display: 'block', bottom: latToY(lat),
@@ -544,40 +607,55 @@ KIJ2013.Map = function(){
             }
             catch (e){}
         },
-        unmark: function(){
+
+        unmark = function(){
             marker.css({display: 'none'});
-        }
-    }
-}();
-KIJ2013.Radio = function(){
+        };
+
+    KIJ2013.Modules.Map =  {
+        show: show,
+        moveTo: moveTo,
+        mark: mark,
+        unmark: unmark
+    };
+
+}(KIJ2013,jQuery,navigator));
+(function(KIJ2013,$){
     var loaded = false,
         player,
-        url = 'http://176.227.210.187:8046/;stream=1';
-    return {
-        init: function(){
-            if(!loaded)
-            {
-                player = $('#player').jPlayer({
-                    cssSelectorAncestor: "#controls",
-                    nativeSupport: true,
-                    ready: function(){
-                        player.jPlayer("setMedia", {mp3:url}).jPlayer('play');
-                    },
-                    swfPath: 'swf',
-                    volume: 60,
-                    errorAlerts: true
-                });
+        url = 'http://176.227.210.187:8046/;stream=1',
+
+    init = function(){
+        player = $('#player').jPlayer({
+            cssSelectorAncestor: "#controls",
+            nativeSupport: true,
+            ready: function(){
+                player.jPlayer("setMedia", {mp3:url});
                 loaded = true;
-            }
-            KIJ2013.setTitle('Radio');
-        }
-    }
-}();
-KIJ2013.Learn = function(){
+            },
+            swfPath: 'swf',
+            volume: 60,
+            errorAlerts: true
+        });
+    },
+
+    show = function(){
+        KIJ2013.setTitle('Radio');
+        if(loaded)
+            player.jPlayer('play');
+    };
+
+    KIJ2013.Modules.Radio = {
+        init: init,
+        show: show
+    };
+
+}(KIJ2013,jQuery));
+(function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
         baseURL = "learn.php?id=",
         baseId = 'learn-',
-        highlight,
+        highlighted_item,
         store,
 
     /**
@@ -610,10 +688,10 @@ KIJ2013.Learn = function(){
                     el = $('<a/>').text(title);
                     el.data('guid', id);
                     el.click(onClickLearnItem);
-                    if(id == highlight)
+                    if(id == highlighted_item)
                     {
                         li.addClass('highlight');
-                        highlight = null;
+                        highlighted_item = null;
                     }
                     li.append(el);
                     list.append(li);
@@ -661,67 +739,119 @@ KIJ2013.Learn = function(){
         })
         .success(success)
         .error(error);
-    };
-    return {
-        init: function(){
+    },
+
+    init = function(){
+        createDatabase();
+    },
+
+    show = function(){
+        displayFoundList();
+    },
+
+    // Mark an item as found by inserting it into the database
+    add = function(id){
+        if(!store)
             createDatabase();
-            displayFoundList();
-        },
-        // Mark an item as found by inserting it into the database
-        add: function(id){
-            if(!store)
-                createDatabase();
-            store.get(id, function(item){
-                if(!item)
-                    store.save({ key: id,
-                        date: (new Date())/1000 });
-            });
-        },
-        highlight: function(id){
-            var el = $('#'+baseId+id),
-                cl = 'highlight';
-            if(el.length)
-            {
-                el.addClass(cl);
-                setTimeout(function(){
-                    el.removeClass(cl);
-                },3000);
-            }
-            else
-                highlight = id;
+        store.get(id, function(item){
+            if(!item)
+                store.save({ key: id,
+                    date: (new Date())/1000 });
+        });
+    },
+
+    highlight = function(id){
+        var el = $('#'+baseId+id),
+            cl = 'highlight';
+        if(el.length)
+        {
+            el.addClass(cl);
+            setTimeout(function(){
+                el.removeClass(cl);
+            },3000);
         }
-    }
-}();
-KIJ2013.Barcode = function(){
+        else
+            highlighted_item = id;
+    };
+
+    KIJ2013.Modules.Learn = {
+        init: init,
+        show: show,
+        add: add,
+        highlight: highlight
+    };
+
+}(KIJ2013,jQuery,Lawnchair));
+(function(KIJ2013,win,nav){
     var video = $('#live')[0],
         canvas = $('<canvas>')[0],
         ctx = canvas.getContext('2d'),
         localMediaStream = null,
-        nav = navigator,
-        win = window,
         qr = typeof qrcode !== "undefined" ? qrcode : false,
-        snapshot = function (){
-            if(localMediaStream && qr){
-                ctx.drawImage(video,0,0);
-                qr.decode(canvas.toDataURL('image/webp'));
-            }
-        },
-        createObjectURL,
         interval,
-        initialised;
-    canvas.width = 640;
-    canvas.height = 480;
-    // Normalise getUserMedia
-    nav.getUserMedia ||
-        (nav.getUserMedia = nav.webkitGetUserMedia);
-    // Normalise window URL
-    win.URL ||
-        (win.URL = win.webkitURL || win.msURL || win.oURL);
+        initialised,
+
+    init = function(){
+        canvas.width = 640;
+        canvas.height = 480;
+        // Normalise getUserMedia
+        nav.getUserMedia ||
+            (nav.getUserMedia = nav.webkitGetUserMedia);
+        // Normalise window URL
+        win.URL ||
+            (win.URL = win.webkitURL || win.msURL || win.oURL);
+        if(!nav.getUserMedia)
+            KIJ2013.showError('Barcode Scanner is not available on your '
+                + 'platform.')
+    },
+
     // Avoid opera quirk
     createObjectURL = function(stream){
         return (win.URL && win.URL.createObjectURL) ?
             win.URL.createObjectURL(stream) : stream;
+    },
+
+    snapshot = function (){
+        if(localMediaStream && qr){
+            ctx.drawImage(video,0,0);
+            qr.decode(canvas.toDataURL('image/webp'));
+        }
+    },
+
+    start = function(){
+        video.play();
+        if(interval)
+            clearInterval(interval);
+        interval = setInterval(snapshot, 1000);
+    },
+
+    stop = function(){
+        video.pause();
+        clearInterval(interval);
+    },
+
+    show = function() {
+        if(!initialised){
+            nav.getUserMedia({video:true},
+                function(stream) {
+                    // Display Preview
+                    video.src = createObjectURL(stream);
+                    // Keep reference to stream for snapshots
+                    localMediaStream = stream;
+                    initialised = true;
+                    start();
+                },
+                function(err) {
+                    console.log("Unable to get video stream!")
+                }
+            );
+        }
+    },
+
+    hide = function(){
+        stop();
     };
+
     if(qr){
         // Set callback for detection of QR Code
         qr.callback = function (a)
@@ -730,58 +860,28 @@ KIJ2013.Barcode = function(){
                 var id = a.slice(26);
                 if(a.slice(0,26) == "http://kij13.org.uk/learn/")
                 {
-                    KIJ2013.Barcode.stop();
-                    KIJ2013.Learn.add(id);
+                    stop();
+                    KIJ2013.Modules.Learn.add(id);
                     alert("Congratulations you found an item.");
                     KIJ2013.navigateTo('Learn');
-                    KIJ2013.Learn.highlight(id);
+                    KIJ2013.Modules.Learn.highlight(id);
                 }
                 else
                     alert(a);
             }
         };
-    }
-    return {
-        init: function(){
-            if(nav.getUserMedia){
-                if(!initialised){
-                    nav.getUserMedia({video:true},
-                        function(stream) {
-                            // Display Preview
-                            video.src = createObjectURL(stream);
-                            // Keep reference to stream for snapshots
-                            localMediaStream = stream;
-                            initialised = true;
-                            KIJ2013.Barcode.start();
-                        },
-                        function(err) {
-                            console.log("Unable to get video stream!")
-                        }
-                    );
-                }
-                else
-                    KIJ2013.Barcode.start();
-            }
-            else
-                KIJ2013.showError('Barcode Scanner is not available on your '
-                    + 'platform.')
-        },
-        start: function(){
-            video.play();
-            if(interval)
-                clearInterval(interval);
-            interval = setInterval(snapshot, 1000);
-        },
-        stop: function(){
-            video.pause();
-            clearInterval(interval);
-        },
-        hide: function(){
-            KIJ2013.Barcode.stop();
-        }
-    }
-}();
-KIJ2013.Settings = function(){
+    };
+
+    KIJ2013.Modules.Barcode = {
+        init: init,
+        show: show,
+        start: start,
+        stop: stop,
+        hide: hide
+    };
+
+}(KIJ2013,window,navigator));
+(function(KIJ2013, $, Lawnchair){
 
     /**
      * PRIVATE Variables
@@ -791,47 +891,47 @@ KIJ2013.Settings = function(){
         TABLE_LEARN = "learn",
         TABLE_PREFS = "preferences",
         subcamp_el,
-        initialised = false;
+        initialised = false,
 
-    return {
-        init: function() {
-            if(!initialised){
-                subcamp_el = $('#subcamp');
-                subcamp_el.val(KIJ2013.getPreference('subcamp'))
-                subcamp_el.change(function(){
-                    var val = subcamp_el.val();
-                    KIJ2013.setPreference("subcamp", val);
+    init = function() {
+        if(!initialised){
+            subcamp_el = $('#subcamp');
+            subcamp_el.val(KIJ2013.getPreference('subcamp'))
+            subcamp_el.change(function(){
+                var val = subcamp_el.val();
+                KIJ2013.setPreference("subcamp", val);
+            });
+            $('#clear-cache').click(function(){
+                var all_done = 0;
+                Lawnchair({name: TABLE_NEWS}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                $('#clear-cache').click(function(){
-                    var all_done = 0;
-                    Lawnchair({name: TABLE_NEWS}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
-                    Lawnchair({name: TABLE_EVENTS}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
-                    Lawnchair({name: TABLE_LEARN}, function(){
-                        this.nuke();
-                        if(++all_done == 3)
-                            alert("Cache Cleared");
-                    });
+                Lawnchair({name: TABLE_EVENTS}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                $('#clear-preferences').click(function(){
-                    Lawnchair({name: TABLE_PREFS}, function(){
-                        this.nuke();
-                        subcamp_el.val('');
-                        alert("Preferences Cleared");
-                    });
+                Lawnchair({name: TABLE_LEARN}, function(){
+                    this.nuke();
+                    if(++all_done == 3)
+                        alert("Cache Cleared");
                 });
-                initialised = true;
-            }
+            });
+            $('#clear-preferences').click(function(){
+                Lawnchair({name: TABLE_PREFS}, function(){
+                    this.nuke();
+                    subcamp_el.val('');
+                    alert("Preferences Cleared");
+                });
+            });
+            initialised = true;
         }
     }
-}();
-$(function(){
-    KIJ2013.init();
-});
+
+    KIJ2013.Modules.Settings = {
+        init: init
+    };
+
+}(KIJ2013, jQuery, Lawnchair));

@@ -71,6 +71,10 @@ header {
   border-bottom: solid 1px #275da1;
 }
 
+.subpage {
+    padding: 20px 0 10px;
+}
+
 header h1 {
   letter-spacing: -1px;
   font-size: 72px;

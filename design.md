@@ -16,7 +16,7 @@ Stages
 The pages in this section detail the design stages and are:
 
 * [Brand](brand)
-* Sketches
+* [Sketches](sketches)
 * Wireframes
 * Full Fidelity Mock-ups
 * Flows

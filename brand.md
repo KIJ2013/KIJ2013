@@ -44,7 +44,21 @@ hsl(300,63.4,18.2);
 <div class="color-preview secondary">
 </div>
 
+Fonts
+-----
+
+The font used for headings and other branded text is:
+
+<p class="font-preview">Hobo Standard Medium</p>
+
 <style>
+@font-face {
+	font-family: 'Hobo';
+	src: url('fonts/HoboStd.eot');
+	src: local('☺'), url('fonts/HoboStd.woff') format('woff'), url('fonts/HoboStd.ttf') format('truetype'), url('fonts/HoboStd.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
 .color-preview {
     height: 100px;
 }
@@ -53,5 +67,10 @@ hsl(300,63.4,18.2);
 }
 .color-preview.secondary {
     background-color: #4C114C;
+}
+.font-preview {
+    font-family: 'Hobo';
+    font-size: 2em;
+    margin-left: 20px;
 }
 </style>

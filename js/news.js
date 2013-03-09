@@ -1,10 +1,16 @@
 (function(KIJ2013,$,Lawnchair){
-    //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
-    var rssURL = "feed.php?f=news.rss",
-        TABLE_NAME = 'news',
+    var TABLE_NAME = 'news',
         store,
         fetching = false,
         view = null,
+        settings = {},
+
+    init = function(){
+        settings = KIJ2013.getModuleSettings('News');
+        createDatabase();
+        fetchItems();
+    },
+
 
     createDatabase = function() {
         store = new Lawnchair({name: TABLE_NAME},function(){});
@@ -17,7 +23,7 @@
     {
         if(!fetching){
             fetching = true;
-            $.get(rssURL, function(data){
+            $.get(settings.rssURL, function(data){
                 var items = [],
                     item,
                     imgs;
@@ -48,7 +54,7 @@
 
     onClickNewsItem = function(event)
     {
-        var sender = $(event.target);
+        var sender = $(event.currentTarget);
         displayNewsItem(sender.data('guid'));
     },
 
@@ -104,23 +110,24 @@
         });
     },
 
-    init = function(){
-        createDatabase();
-        fetchItems();
-    },
-
     show = function(){
         displayNewsList();
     },
 
     hide = function() {
         view = null;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.News = {
+        /** Public Methods */
         init: init,
         show: show,
-        hide: hide
+        hide: hide,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));

@@ -1,9 +1,8 @@
 (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
-        baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlighted_item,
-        store,
+        store,settings = {},
 
     /**
      * Create Database
@@ -77,7 +76,7 @@
         });
     },
     loadItem = function(id, success, error){
-        $.get(baseURL + id, function(data){
+        $.get(settings.contentURL + id, function(data){
             store.get(id, function(item){
                 item.title = data.title;
                 item.description = data.description;
@@ -89,6 +88,7 @@
     },
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Learn');
         createDatabase();
     },
 
@@ -119,13 +119,18 @@
         }
         else
             highlighted_item = id;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Learn = {
         init: init,
         show: show,
         add: add,
-        highlight: highlight
+        highlight: highlight,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));

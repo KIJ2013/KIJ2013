@@ -31,6 +31,10 @@ was required and lack of hardware access. However with HTML5's new APIs these
 problems are mostly mitigated. Web Apps can cache data and files for offline use
 and some hardware functions are accessible through APIs.
 
+This version is the one hosted at:
+
+    $ git clone git://github.com/KIJ2013/KIJ2013.git
+
 PhoneGap
 --------
 
@@ -48,6 +52,10 @@ A [service](http://build.phonegap.com) provided by the PhoneGap people which
 means the developer doesn't need to download the development environments and
 SDKs for all the platform to be targeted. Currently 6 platforms are supported
 through PhoneGp Build.
+
+This version uses the Web App as its upstream and is hosted at:
+
+    $ git clone git://github.com/KIJ2013/KIJ2013-phonegap.git
 
 Android, iOS, Windows Phone, Blackberry, WebOS, Symbian
 -------------------------------------------------------

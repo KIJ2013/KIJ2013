@@ -30,7 +30,7 @@ Colours
 -------
 
 The main colour for KIJ is known as Orange Yellow or
-[Sunglow](http://en.wikipedia.org/wiki/Gold_(color)#Sunglow. The hex code for it
+[Sunglow](http://en.wikipedia.org/wiki/Gold_(color)#Sunglow). The hex code for it
 is #FFCC33; Other representations: rgb(255,204,51); cmyk(0,0.2,0.8,0);
 hsv(45,80,100); hsl(45,100,60);
 
@@ -69,6 +69,7 @@ The font used for headings and other branded text is:
     background-color: #4C114C;
 }
 .font-preview {
+    color: black;
     font-family: 'Hobo';
     font-size: 2em;
     margin-left: 20px;

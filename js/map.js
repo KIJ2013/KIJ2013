@@ -1,27 +1,31 @@
 (function(KIJ2013,$,navigator){
-    var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
-        51.305519711648124],
-        img_size = [2516,1867],
-        xScale = img_size[0]/(img_bounds[2]-img_bounds[0]),
-        yScale = img_size[1]/(img_bounds[3]-img_bounds[1]),
+    var xScale,
+        yScale,
         img,
         marker,
         initialised=false,
+        settings = {},
+
+        init = function(){
+            var s = settings = KIJ2013.getModuleSettings('Map');
+            xScale = s.imageSize[0]/(s.imageBounds[2]-s.imageBounds[0]);
+            yScale = s.imageSize[1]/(s.imageBounds[3]-s.imageBounds[1]);
+        },
 
         lonToX = function(lon){
-            if(lon<img_bounds[0])
+            if(lon<settings.imageBounds[0])
                 throw "OutOfBounds";
-            if(lon>img_bounds[2])
+            if(lon>settings.imageBounds[2])
                 throw "OutOfBounds";
-            return (lon-img_bounds[0])*xScale;
+            return (lon-settings.imageBounds[0])*xScale;
         },
 
         latToY = function(lat){
-            if(lat<img_bounds[1])
+            if(lat<settings.imageBounds[1])
                 throw "OutOfBounds";
-            if(lat>img_bounds[3])
+            if(lat>settings.imageBounds[3])
                 throw "OutOfBounds";
-            return (lat-img_bounds[1])*yScale;
+            return (lat-settings.imageBounds[1])*yScale;
         },
 
         show = function(){
@@ -31,7 +35,7 @@
                 if(img.length == 0)
                 {
                     KIJ2013.showLoading();
-                    img = $('<img />').attr('src', "img/map.png")
+                    img = $('<img />').attr('src', settings.imageURL)
                         .appendTo('#map').load(
                         function(){
                             moveTo(51.3015, 0.584);
@@ -62,7 +66,7 @@
                     height = win.height(),
                     width = win.width(),
                     x = lonToX(lon) - width / 2,
-                    y = img_size[1] - latToY(lat) - height / 2;
+                    y = settings.imageSize[1] - latToY(lat) - height / 2;
                 setTimeout(function(){window.scrollTo(x, y);},10);
             }
             catch (e){}
@@ -82,6 +86,7 @@
         };
 
     KIJ2013.Modules.Map =  {
+        init: init,
         show: show,
         moveTo: moveTo,
         mark: mark,

@@ -3,42 +3,33 @@
     /**
      * PRIVATE Variables
      */
-    var TABLE_NEWS = "news",
-        TABLE_EVENTS = "events",
-        TABLE_LEARN = "learn",
-        TABLE_PREFS = "preferences",
-        subcamp_el,
+    var subcamp_el,
         initialised = false,
 
     init = function() {
         if(!initialised){
             subcamp_el = $('#subcamp');
-            subcamp_el.val(KIJ2013.getPreference('subcamp'))
+            var subcamps = KIJ2013.getSetting('subcamps',[]),
+                subcamp = KIJ2013.getPreference('subcamp'),
+                i = 0,
+                l = subcamps.length,
+                name, opt;
+            $('<option>').appendTo(subcamp_el);
+            for(;i<l;i++){
+                name = subcamps[i];
+                opt = $('<option>').val(name).text(name).appendTo(subcamp_el);
+                if(name == subcamp)
+                    opt.attr('selected',true);
+            }
             subcamp_el.change(function(){
                 var val = subcamp_el.val();
                 KIJ2013.setPreference("subcamp", val);
             });
             $('#clear-cache').click(function(){
-                var all_done = 0;
-                Lawnchair({name: TABLE_NEWS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_EVENTS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_LEARN}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
+                KIJ2013.clearCaches(function(){alert('Cache Cleared');});
             });
             $('#clear-preferences').click(function(){
-                Lawnchair({name: TABLE_PREFS}, function(){
-                    this.nuke();
+                KIJ2013.clearPreferences(function(){
                     subcamp_el.val('');
                     alert("Preferences Cleared");
                 });

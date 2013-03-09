@@ -6,8 +6,10 @@
         qr = typeof qrcode !== "undefined" ? qrcode : false,
         interval,
         initialised,
+        settings = {},
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Barcode');
         canvas.width = 640;
         canvas.height = 480;
         // Normalise getUserMedia
@@ -73,8 +75,10 @@
         qr.callback = function (a)
         {
             if(a){
-                var id = a.slice(26);
-                if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+                var prefix = settings.urlPrefix,
+                    length = prefix.length,
+                    id = a.slice(length);
+                if(a.slice(0,length) == prefix)
                 {
                     stop();
                     KIJ2013.Modules.Learn.add(id);

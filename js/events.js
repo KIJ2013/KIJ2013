@@ -3,11 +3,10 @@
     /**
      * PRIVATE Variables
      */
-    //var rssURL = "http://www.kij13.org.uk/category/events/feed/";
-    var jsonURL = "events.json",
-        TABLE_NAME = "events",
+    var TABLE_NAME = "events",
         store,
         visible = false,
+        settings = {},
 
     /**
      * Create Database
@@ -21,7 +20,7 @@
     */
     fetchItems = function()
     {
-        $.get(jsonURL, function(data){
+        $.get(settings.jsonURL, function(data){
             var items = [],
                 item;
             $(data).each(function(i,jitem){
@@ -162,6 +161,7 @@
     },
 
     init = function() {
+        settings = KIJ2013.getModuleSettings('Events');
         createDatabase();
         fetchItems();
     },
@@ -173,12 +173,17 @@
 
     hide = function(){
         visible = false;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Events = {
         init: init,
         show: show,
-        hide: hide
+        hide: hide,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));

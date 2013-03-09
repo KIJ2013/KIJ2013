@@ -1,14 +1,15 @@
 (function(KIJ2013,$){
     var loaded = false,
         player,
-        url = 'http://176.227.210.187:8046/;stream=1',
+        settings = {},
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Radio');
         player = $('#player').jPlayer({
             cssSelectorAncestor: "#controls",
             nativeSupport: true,
             ready: function(){
-                player.jPlayer("setMedia", {mp3:url});
+                player.jPlayer("setMedia", {mp3:settings.streamURL});
                 loaded = true;
             },
             swfPath: 'swf',

@@ -1,6 +1,8 @@
 var KIJ2013 = (function(window, $, Lawnchair){
-    var preferences = {key:"preferences"},
-        TABLE_PREFERENCES = "preferences",
+    var store_name = "core",
+        preferences_key = "preferences",
+        settings_key = "settings",
+        default_settings_url = "settings.json",
         loading,
         beingLoaded,
         popup,
@@ -13,15 +15,30 @@ var KIJ2013 = (function(window, $, Lawnchair){
          *   preferences have finished loading.
          */
         init = function(callback){
-            store = Lawnchair({name: TABLE_PREFERENCES}, function(){
-                this.get("preferences", function(pref){
+            // Load preferences from store
+            store = Lawnchair({name: store_name}, function(){
+                var both = false;
+                this.get(preferences_key, function(pref){
                     if(pref)
                         preferences = pref;
-                    if(typeof callback == "function"){
+                    if(both && typeof callback == "function"){
                         callback();
                     }
+                    both = true;
+                });
+                this.get(settings_key, function(sett){
+                    if(sett)
+                        settings = sett;
+
+                    loadSettings();
+
+                    if(both && typeof callback == "function"){
+                        callback();
+                    }
+                    both = true;
                 });
             });
+
             setActionBarUp();
             var select = $('#action_bar select'),
                 first = false;
@@ -45,15 +62,58 @@ var KIJ2013 = (function(window, $, Lawnchair){
             },1500);
         },
 
+        /**
+         * Load settings from configured source
+         */
+        loadSettings = function(){
+            var urls = settings.settingsURL.push ?
+                    settings.settingsURL.slice() : [settings.settingsURL];
+            urls.push(default_settings_url);
+            KIJ2013.Util.loadFirst(urls, function(json){
+                json.key = settings_key;
+                settings = json;
+                store.save(settings);
+            });
+        },
+
+        defaultSettings = function(){
+            return {key: settings_key, settingsURL: default_settings_url};
+        },
+        settings = defaultSettings(),
+
+        defaultPreferences = function(){
+            return {key: preferences_key};
+        },
+        preferences = defaultPreferences(),
+
         getPreference = function(name, def){
             return preferences[name] || def || null;
         },
 
         setPreference = function(name, value)
         {
-            if(name == "key") return;
+            // Do not allow overriding key
+            if(name == "key"){ return; }
+
             preferences[name] = value;
             store.save(preferences);
+        },
+
+        clearPreferences = function(callback){
+            preferences = defaultPreferences();
+            store.save(preferences, callback);
+        },
+
+        clearCaches = function(callback){
+            settings = defaultSettings();
+            store.save(settings, callback);
+            loadSettings();
+
+            // Callback should be delayed until modules have finished clearing
+            for(module in modules){
+                if(modules[module].clearCache)
+                    modules[module].clearCache();
+            }
         },
 
         navigateTo = function(name) {
@@ -144,6 +204,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
      * Export public API functions
      */
     return {
+        clearCaches: clearCaches,
+        clearPreferences: clearPreferences,
         getPreference: getPreference,
         hideLoading: hideLoading,
         init: init,
@@ -209,6 +271,30 @@ $(function(){
 
         ucfirst = function(string){
             return string.slice(0,1).toUpperCase() + string.slice(1)
+        },
+
+        /**
+         * Load each URL in turn until one succeeds
+         * @param string[] urls Array of urls to try
+         * @param function callback Function to be called once successful
+         * @param string type Expected dataType, defaults to 'json'
+         */
+        loadFirst = function(urls, callback, type){
+            var l = urls.length,
+                e = function(){
+                    if(i<l){
+                        f(i+1);
+                    }
+                },
+                f = function(i){
+                    $.ajax({
+                        url: urls[i],
+                        dataType: type || 'json',
+                        success: callback,
+                        error: e
+                    });
+                };
+            f(0);
         };
 
     KIJ2013.Util = {
@@ -216,7 +302,8 @@ $(function(){
         filter: filter,
         sort: sort,
         merge: merge,
-        ucfirst: ucfirst
+        ucfirst: ucfirst,
+        loadFirst: loadFirst
     };
 }());
 (function(KIJ2013,$,Lawnchair){
@@ -336,12 +423,17 @@ $(function(){
 
     hide = function() {
         view = null;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.News = {
         init: init,
         show: show,
-        hide: hide
+        hide: hide,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -520,12 +612,17 @@ $(function(){
 
     hide = function(){
         visible = false;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Events = {
         init: init,
         show: show,
-        hide: hide
+        hide: hide,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -772,13 +869,18 @@ $(function(){
         }
         else
             highlighted_item = id;
+    },
+
+    clearCache = function(){
+        store.nuke();
     };
 
     KIJ2013.Modules.Learn = {
         init: init,
         show: show,
         add: add,
-        highlight: highlight
+        highlight: highlight,
+        clearCache: clearCache
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -886,11 +988,7 @@ $(function(){
     /**
      * PRIVATE Variables
      */
-    var TABLE_NEWS = "news",
-        TABLE_EVENTS = "events",
-        TABLE_LEARN = "learn",
-        TABLE_PREFS = "preferences",
-        subcamp_el,
+    var subcamp_el,
         initialised = false,
 
     init = function() {
@@ -902,26 +1000,10 @@ $(function(){
                 KIJ2013.setPreference("subcamp", val);
             });
             $('#clear-cache').click(function(){
-                var all_done = 0;
-                Lawnchair({name: TABLE_NEWS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_EVENTS}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
-                Lawnchair({name: TABLE_LEARN}, function(){
-                    this.nuke();
-                    if(++all_done == 3)
-                        alert("Cache Cleared");
-                });
+                KIJ2013.clearCaches(function(){alert('Cache Cleared');});
             });
             $('#clear-preferences').click(function(){
-                Lawnchair({name: TABLE_PREFS}, function(){
-                    this.nuke();
+                KIJ2013.clearPreferences(function(){
                     subcamp_el.val('');
                     alert("Preferences Cleared");
                 });

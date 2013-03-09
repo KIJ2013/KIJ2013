@@ -9,7 +9,18 @@
     init = function() {
         if(!initialised){
             subcamp_el = $('#subcamp');
-            subcamp_el.val(KIJ2013.getPreference('subcamp'))
+            var subcamps = KIJ2013.getSetting('subcamps',[]),
+                subcamp = KIJ2013.getPreference('subcamp'),
+                i = 0,
+                l = subcamps.length,
+                name, opt;
+            $('<option>').appendTo(subcamp_el);
+            for(;i<l;i++){
+                name = subcamps[i];
+                opt = $('<option>').val(name).text(name).appendTo(subcamp_el);
+                if(name == subcamp)
+                    opt.attr('selected',true);
+            }
             subcamp_el.change(function(){
                 var val = subcamp_el.val();
                 KIJ2013.setPreference("subcamp", val);

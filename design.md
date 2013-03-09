@@ -19,5 +19,5 @@ The pages in this section detail the design stages and are:
 * [Sketches](sketches)
 * Wireframes
 * Full Fidelity Mock-ups
-* Flows
+* [Flows](flows)
 * Redlines

@@ -45,7 +45,7 @@ Barcode
 The flow concerning scanning and finding a barcode can be quite complicated.
 There are two flows shown below. The first uses the internal barcode scanner
 which is available on supported platforms and where an external native one can't
-be used. Scanning a barcode in the correct format
+be used. Scanning a barcode in the correct format i.e.
 `http://www.kij13.org.uk/learn/` takes the user to the list of items which have
 already been 'found' or scanned.
 

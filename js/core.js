@@ -15,19 +15,19 @@ var KIJ2013 = (function(window, $, Lawnchair){
         init = function(){
             var firstModule,
                 afterDB = function(){
-                var select = $('#action_bar select');
-                select.empty();
-                for(module in modules){
-                    if(!firstModule)
-                        firstModule = module;
-                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
-                    if(typeof modules[module].init == "function")
-                        modules[module].init();
-                }
-                select.change(function(){
-                    navigateTo(select.val());
-                });
-            };
+                    var select = $('#action_bar select'), m;
+                    select.empty();
+                    for(module in modules){
+                        if(!firstModule)
+                            firstModule = module;
+                        $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
+                        m = modules[module];
+                        (typeof m.init == "function") && m.init();
+                    }
+                    select.change(function(){
+                        navigateTo(select.val());
+                    });
+                };
 
             // Load preferences from store
             store = Lawnchair({name: store_name}, function(){
@@ -86,6 +86,10 @@ var KIJ2013 = (function(window, $, Lawnchair){
 
         getSetting = function(name, def){
             return settings[name] || def || null;
+        },
+
+        getModuleSettings = function(name){
+            return (settings.modules && settings.modules[name]) || {};
         },
 
         getPreference = function(name, def){
@@ -208,6 +212,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
     return {
         clearCaches: clearCaches,
         clearPreferences: clearPreferences,
+        getModuleSettings: getModuleSettings,
         getPreference: getPreference,
         getSetting: getSetting,
         hideLoading: hideLoading,
@@ -283,21 +288,23 @@ $(function(){
          * @param string type Expected dataType, defaults to 'json'
          */
         loadFirst = function(urls, callback, type){
+            if(!urls)
+                return;
+
             var l = urls.length,
-                e = function(){
-                    if(i<l){
-                        f(i+1);
-                    }
-                },
                 f = function(i){
-                    $.ajax({
+                    return $.ajax({
                         url: urls[i]+"?"+(Math.random()*10000).toFixed(),
                         dataType: type || 'json',
                         success: callback,
-                        error: e
+                        error: function(){
+                            if(i<l-1){
+                                f(i+1);
+                            }
+                        }
                     });
                 };
-            f(0);
+            return f(0);
         };
 
     KIJ2013.Util = {

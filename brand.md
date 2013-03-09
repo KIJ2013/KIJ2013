@@ -34,13 +34,15 @@ The main colour for KIJ is known as Orange Yellow or
 is #FFCC33; Other representations: rgb(255,204,51); cmyk(0,0.2,0.8,0);
 hsv(45,80,100); hsl(45,100,60);
 
-<div class="color-preview primary"></div>
+<div class="color-preview primary">
+</div>
 
 The secondary colour used in the branding is also shown below. Its hex triplet
 is #4C114C; Other representations: rgb(76,17,76); cmyk(0,0.776,0,0.702);
 hsl(300,63.4,18.2);
 
-<div class="color-preview secondary"></div>
+<div class="color-preview secondary">
+</div>
 
 <style>
 .color-preview {

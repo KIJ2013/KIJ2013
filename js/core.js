@@ -8,14 +8,20 @@ var KIJ2013 = (function(window, $, Lawnchair){
         popup,
         store,
         modules = {},
+        events = $({}),
 
         /**
          * Initialise KIJ2013 objects, databases and preferences
          */
         init = function(){
-            var firstModule,
-                afterDB = function(){
-                    var select = $('#action_bar select'), m;
+
+            popup = $('#popup');
+            loading = $('#loading');
+            setActionBarUp();
+
+            var afterDB = function(){
+                    var firstModule,
+                        select = $('#action_bar select'), m;
                     select.empty();
                     for(module in modules){
                         if(!firstModule)
@@ -27,11 +33,15 @@ var KIJ2013 = (function(window, $, Lawnchair){
                     select.change(function(){
                         navigateTo(select.val());
                     });
+
+                    $('#action_bar').show();
+                    navigateTo(firstModule);
+                    setTimeout(function() {window.scrollTo(0, 1);}, 0);
                 };
 
-            // Load preferences from store
             store = Lawnchair({name: store_name}, function(){
                 var both = false;
+                // Load preferences from store
                 this.get(preferences_key, function(pref){
                     if(pref)
                         preferences = pref;
@@ -39,25 +49,21 @@ var KIJ2013 = (function(window, $, Lawnchair){
                     both && afterDB();
                     both = true;
                 });
-                this.get(settings_key, function(sett){
-                    if(sett)
-                        settings = sett;
 
-                    loadSettings();
-
+                events.bind('settingsload', function(){
                     both && afterDB();
                     both = true;
                 });
-            });
 
-            setActionBarUp();
-            popup = $('#popup');
-            loading = $('#loading');
-            setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            setTimeout(function(){
-                $('#action_bar').show();
-                navigateTo(firstModule);
-            },1000);
+                // Load settings from store
+                this.get(settings_key, function(sett){
+                    if(sett){
+                        settings = sett;
+                        events.trigger('settingsload');
+                    }
+                    loadSettings();
+                });
+            });
         },
 
         /**
@@ -70,7 +76,11 @@ var KIJ2013 = (function(window, $, Lawnchair){
             KIJ2013.Util.loadFirst(urls, function(json){
                 json.key = settings_key;
                 settings = json;
-                store.save(settings);
+                if(store)
+                    store.save(settings);
+                else
+                    console.log("Error: Store not available to save settings");
+                events.trigger('settingsload');
             });
         },
 

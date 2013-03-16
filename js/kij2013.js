@@ -8,58 +8,88 @@ var KIJ2013 = (function(window, $, Lawnchair){
         popup,
         store,
         modules = {},
+        events = $({}),
 
         /**
          * Initialise KIJ2013 objects, databases and preferences
-         * @param callback Allows a callack to be attached which fires when
-         *   preferences have finished loading.
          */
-        init = function(callback){
-            // Load preferences from store
+        init = function(){
+
+            popup = $('#popup');
+            loading = $('#loading');
+
+            var firstModule;
+
+            events.bind('contentready', function(){
+                console.log('contentready');
+                setActionBarUp();
+                $('#action_bar').show();
+                navigateTo(firstModule);
+                setTimeout(function() {window.scrollTo(0, 1);}, 0);
+            });
+
+            events.bind('databaseready', function(){
+                console.log('databaseready');
+                var select = $('#action_bar select'),
+                    m, trigger = false;
+                select.empty();
+                for(module in modules){
+                    m = modules[module];
+                    if(!firstModule){
+                        firstModule = module;
+                        if(m.contentready){
+                            m.contentready(function(){events.trigger('contentready')});
+                        }
+                        else {
+                            trigger = true;
+                        }
+                    }
+                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
+                    (typeof m.init == "function") && m.init();
+                }
+                select.change(function(){
+                    navigateTo(select.val());
+                });
+                if(trigger) {
+                    events.trigger('contentready');
+                }
+            });
+
             store = Lawnchair({name: store_name}, function(){
-                var both = false;
+                var prefReady = false,
+                    settReady = false,
+                    databaseReady = false;
+
+                // Load preferences from store
                 this.get(preferences_key, function(pref){
                     if(pref)
                         preferences = pref;
-                    if(both && typeof callback == "function"){
-                        callback();
+
+                    if(settReady && !databaseReady){
+                        events.trigger('databaseready');
+                        databaseReady = true;
                     }
-                    both = true;
+                    prefReady = true;
                 });
+
+                events.bind('settingsload', function(){
+                    console.log('settingsload');
+                    if(prefReady && !databaseReady){
+                        events.trigger('databaseready');
+                        databaseReady = true;
+                    }
+                    settReady = true;
+                });
+
+                // Load settings from store
                 this.get(settings_key, function(sett){
-                    if(sett)
+                    if(sett){
                         settings = sett;
-
-                    loadSettings();
-
-                    if(both && typeof callback == "function"){
-                        callback();
+                        events.trigger('settingsload');
                     }
-                    both = true;
+                    loadSettings();
                 });
             });
-
-            setActionBarUp();
-            var select = $('#action_bar select'),
-                first = false;
-            select.empty();
-            for(module in modules){
-                if(!first)
-                    first = module;
-                select.append("<option>"+KIJ2013.Util.ucfirst(module)+"</option>");
-                if(typeof modules[module].init == "function")
-                    modules[module].init();
-            }
-            select.change(function(){
-                navigateTo(select.val());
-            });
-            popup = $('#popup');
-            loading = $('#loading');
-            setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            setTimeout(function(){
-                $('#action_bar').show();
-                navigateTo(first);
-            },1500);
         },
 
         /**
@@ -72,7 +102,11 @@ var KIJ2013 = (function(window, $, Lawnchair){
             KIJ2013.Util.loadFirst(urls, function(json){
                 json.key = settings_key;
                 settings = json;
-                store.save(settings);
+                if(store)
+                    store.save(settings);
+                else
+                    console.log("Error: Store not available to save settings");
+                events.trigger('settingsload');
             });
         },
 
@@ -85,6 +119,14 @@ var KIJ2013 = (function(window, $, Lawnchair){
             return {key: preferences_key};
         },
         preferences = defaultPreferences(),
+
+        getSetting = function(name, def){
+            return settings[name] || def || null;
+        },
+
+        getModuleSettings = function(name){
+            return (settings.modules && settings.modules[name]) || {};
+        },
 
         getPreference = function(name, def){
             return preferences[name] || def || null;
@@ -158,7 +200,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
         {
             var blank = typeof title == "undefined" || title == "",
                 default_title = "KIJ2013";
-            $('title').text(blank ? default_title : default_title + " - " + title);
+            //$('title').text(blank ? default_title : default_title + " - " + title);
             $('#action_bar h1').text(blank ? default_title : title);
         },
 
@@ -206,7 +248,9 @@ var KIJ2013 = (function(window, $, Lawnchair){
     return {
         clearCaches: clearCaches,
         clearPreferences: clearPreferences,
+        getModuleSettings: getModuleSettings,
         getPreference: getPreference,
+        getSetting: getSetting,
         hideLoading: hideLoading,
         init: init,
         navigateTo: navigateTo,
@@ -280,21 +324,23 @@ $(function(){
          * @param string type Expected dataType, defaults to 'json'
          */
         loadFirst = function(urls, callback, type){
+            if(!urls)
+                return;
+
             var l = urls.length,
-                e = function(){
-                    if(i<l){
-                        f(i+1);
-                    }
-                },
                 f = function(i){
-                    $.ajax({
-                        url: urls[i],
+                    return $.ajax({
+                        url: urls[i]+"?"+(Math.random()*10000).toFixed(),
                         dataType: type || 'json',
                         success: callback,
-                        error: e
+                        error: function(){
+                            if(i<l-1){
+                                f(i+1);
+                            }
+                        }
                     });
                 };
-            f(0);
+            return f(0);
         };
 
     KIJ2013.Util = {
@@ -307,12 +353,20 @@ $(function(){
     };
 }());
 (function(KIJ2013,$,Lawnchair){
-    //var rssURL = "http://www.kij13.org.uk/category/latest-news/feed/";
-    var rssURL = "feed.php?f=news.rss",
-        TABLE_NAME = 'news',
+    var TABLE_NAME = 'news',
         store,
         fetching = false,
+        contentready = false,
         view = null,
+        settings = {},
+        events = $({}),
+
+    init = function(){
+        settings = KIJ2013.getModuleSettings('News');
+        createDatabase();
+        fetchItems();
+    },
+
 
     createDatabase = function() {
         store = new Lawnchair({name: TABLE_NAME},function(){});
@@ -325,7 +379,7 @@ $(function(){
     {
         if(!fetching){
             fetching = true;
-            $.get(rssURL, function(data){
+            $.get(settings.rssURL, function(data){
                 var items = [],
                     item,
                     imgs;
@@ -345,6 +399,8 @@ $(function(){
                 store.batch(items, function(){
                     if(view == "list")
                         displayNewsList();
+                    events.trigger('contentready');
+                    contentready = true;
                 });
                 fetching = false;
             },"xml").error(function(jqXHR,status,error){
@@ -356,7 +412,7 @@ $(function(){
 
     onClickNewsItem = function(event)
     {
-        var sender = $(event.target);
+        var sender = $(event.currentTarget);
         displayNewsItem(sender.data('guid'));
     },
 
@@ -391,9 +447,11 @@ $(function(){
                 });
                 $('#news').empty().append(list);
                 KIJ2013.hideLoading();
+                if(!contentready) {
+                    events.trigger('contentready');
+                    contentready = true;
+                }
             }
-            else
-                KIJ2013.showLoading();
         });
     },
 
@@ -412,11 +470,6 @@ $(function(){
         });
     },
 
-    init = function(){
-        createDatabase();
-        fetchItems();
-    },
-
     show = function(){
         displayNewsList();
     },
@@ -427,13 +480,19 @@ $(function(){
 
     clearCache = function(){
         store.nuke();
+    },
+
+    onContentReady = function(callback){
+        events.bind('contentready', callback);
     };
 
     KIJ2013.Modules.News = {
+        /** Public Methods */
         init: init,
         show: show,
         hide: hide,
-        clearCache: clearCache
+        clearCache: clearCache,
+        contentready: onContentReady
     };
 
 }(KIJ2013,jQuery,Lawnchair));
@@ -442,11 +501,10 @@ $(function(){
     /**
      * PRIVATE Variables
      */
-    //var rssURL = "http://www.kij13.org.uk/category/events/feed/";
-    var jsonURL = "events.json",
-        TABLE_NAME = "events",
+    var TABLE_NAME = "events",
         store,
         visible = false,
+        settings = {},
 
     /**
      * Create Database
@@ -460,7 +518,7 @@ $(function(){
     */
     fetchItems = function()
     {
-        $.get(jsonURL, function(data){
+        $.get(settings.jsonURL, function(data){
             var items = [],
                 item;
             $(data).each(function(i,jitem){
@@ -601,6 +659,7 @@ $(function(){
     },
 
     init = function() {
+        settings = KIJ2013.getModuleSettings('Events');
         createDatabase();
         fetchItems();
     },
@@ -627,29 +686,33 @@ $(function(){
 
 }(KIJ2013,jQuery,Lawnchair));
 (function(KIJ2013,$,navigator){
-    var img_bounds = [0.5785846710205073,51.299361979488744,0.5925965309143088,
-        51.305519711648124],
-        img_size = [2516,1867],
-        xScale = img_size[0]/(img_bounds[2]-img_bounds[0]),
-        yScale = img_size[1]/(img_bounds[3]-img_bounds[1]),
+    var xScale,
+        yScale,
         img,
         marker,
         initialised=false,
+        settings = {},
+
+        init = function(){
+            var s = settings = KIJ2013.getModuleSettings('Map');
+            xScale = s.imageSize[0]/(s.imageBounds[2]-s.imageBounds[0]);
+            yScale = s.imageSize[1]/(s.imageBounds[3]-s.imageBounds[1]);
+        },
 
         lonToX = function(lon){
-            if(lon<img_bounds[0])
+            if(lon<settings.imageBounds[0])
                 throw "OutOfBounds";
-            if(lon>img_bounds[2])
+            if(lon>settings.imageBounds[2])
                 throw "OutOfBounds";
-            return (lon-img_bounds[0])*xScale;
+            return (lon-settings.imageBounds[0])*xScale;
         },
 
         latToY = function(lat){
-            if(lat<img_bounds[1])
+            if(lat<settings.imageBounds[1])
                 throw "OutOfBounds";
-            if(lat>img_bounds[3])
+            if(lat>settings.imageBounds[3])
                 throw "OutOfBounds";
-            return (lat-img_bounds[1])*yScale;
+            return (lat-settings.imageBounds[1])*yScale;
         },
 
         show = function(){
@@ -659,7 +722,7 @@ $(function(){
                 if(img.length == 0)
                 {
                     KIJ2013.showLoading();
-                    img = $('<img />').attr('src', "img/map.png")
+                    img = $('<img />').attr('src', settings.imageURL)
                         .appendTo('#map').load(
                         function(){
                             moveTo(51.3015, 0.584);
@@ -690,7 +753,7 @@ $(function(){
                     height = win.height(),
                     width = win.width(),
                     x = lonToX(lon) - width / 2,
-                    y = img_size[1] - latToY(lat) - height / 2;
+                    y = settings.imageSize[1] - latToY(lat) - height / 2;
                 setTimeout(function(){window.scrollTo(x, y);},10);
             }
             catch (e){}
@@ -710,6 +773,7 @@ $(function(){
         };
 
     KIJ2013.Modules.Map =  {
+        init: init,
         show: show,
         moveTo: moveTo,
         mark: mark,
@@ -720,14 +784,15 @@ $(function(){
 (function(KIJ2013,$){
     var loaded = false,
         player,
-        url = 'http://176.227.210.187:8046/;stream=1',
+        settings = {},
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Radio');
         player = $('#player').jPlayer({
             cssSelectorAncestor: "#controls",
             nativeSupport: true,
             ready: function(){
-                player.jPlayer("setMedia", {mp3:url});
+                player.jPlayer("setMedia", {mp3:settings.streamURL});
                 loaded = true;
             },
             swfPath: 'swf',
@@ -750,10 +815,9 @@ $(function(){
 }(KIJ2013,jQuery));
 (function(KIJ2013,$,Lawnchair){
     var TABLE_NAME = "learn",
-        baseURL = "learn.php?id=",
         baseId = 'learn-',
         highlighted_item,
-        store,
+        store,settings = {},
 
     /**
      * Create Database
@@ -827,7 +891,7 @@ $(function(){
         });
     },
     loadItem = function(id, success, error){
-        $.get(baseURL + id, function(data){
+        $.get(settings.contentURL + id, function(data){
             store.get(id, function(item){
                 item.title = data.title;
                 item.description = data.description;
@@ -839,6 +903,7 @@ $(function(){
     },
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Learn');
         createDatabase();
     },
 
@@ -892,8 +957,10 @@ $(function(){
         qr = typeof qrcode !== "undefined" ? qrcode : false,
         interval,
         initialised,
+        settings = {},
 
     init = function(){
+        settings = KIJ2013.getModuleSettings('Barcode');
         canvas.width = 640;
         canvas.height = 480;
         // Normalise getUserMedia
@@ -959,8 +1026,10 @@ $(function(){
         qr.callback = function (a)
         {
             if(a){
-                var id = a.slice(26);
-                if(a.slice(0,26) == "http://kij13.org.uk/learn/")
+                var prefix = settings.urlPrefix,
+                    length = prefix.length,
+                    id = a.slice(length);
+                if(a.slice(0,length) == prefix)
                 {
                     stop();
                     KIJ2013.Modules.Learn.add(id);
@@ -994,7 +1063,18 @@ $(function(){
     init = function() {
         if(!initialised){
             subcamp_el = $('#subcamp');
-            subcamp_el.val(KIJ2013.getPreference('subcamp'))
+            var subcamps = KIJ2013.getSetting('subcamps',[]),
+                subcamp = KIJ2013.getPreference('subcamp'),
+                i = 0,
+                l = subcamps.length,
+                name, opt;
+            $('<option>').appendTo(subcamp_el);
+            for(;i<l;i++){
+                name = subcamps[i];
+                opt = $('<option>').val(name).text(name).appendTo(subcamp_el);
+                if(name == subcamp)
+                    opt.attr('selected',true);
+            }
             subcamp_el.change(function(){
                 var val = subcamp_el.val();
                 KIJ2013.setPreference("subcamp", val);

@@ -2,8 +2,10 @@
     var TABLE_NAME = 'news',
         store,
         fetching = false,
+        contentready = false,
         view = null,
         settings = {},
+        events = $({}),
 
     init = function(){
         settings = KIJ2013.getModuleSettings('News');
@@ -43,6 +45,8 @@
                 store.batch(items, function(){
                     if(view == "list")
                         displayNewsList();
+                    events.trigger('contentready');
+                    contentready = true;
                 });
                 fetching = false;
             },"xml").error(function(jqXHR,status,error){
@@ -89,9 +93,11 @@
                 });
                 $('#news').empty().append(list);
                 KIJ2013.hideLoading();
+                if(!contentready) {
+                    events.trigger('contentready');
+                    contentready = true;
+                }
             }
-            else
-                KIJ2013.showLoading();
         });
     },
 
@@ -120,6 +126,10 @@
 
     clearCache = function(){
         store.nuke();
+    },
+
+    onContentReady = function(callback){
+        events.bind('contentready', callback);
     };
 
     KIJ2013.Modules.News = {
@@ -127,7 +137,8 @@
         init: init,
         show: show,
         hide: hide,
-        clearCache: clearCache
+        clearCache: clearCache,
+        contentready: onContentReady
     };
 
 }(KIJ2013,jQuery,Lawnchair));

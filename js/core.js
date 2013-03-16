@@ -200,7 +200,6 @@ var KIJ2013 = (function(window, $, Lawnchair){
         {
             var blank = typeof title == "undefined" || title == "",
                 default_title = "KIJ2013";
-            $('title').text(blank ? default_title : default_title + " - " + title);
             $('#action_bar h1').text(blank ? default_title : title);
         },
 

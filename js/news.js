@@ -103,10 +103,6 @@
         });
     },
 
-    generateBackgroundColor = function(data){
-        return '#'+Sha1.hash(data).slice(0,6);
-    },
-
     displayNewsItem = function(guid){
         view = "item";
         KIJ2013.setActionBarUp(function(){
@@ -120,6 +116,10 @@
             $('#news').empty().append(content);
             KIJ2013.scrollTop();
         });
+    },
+
+    generateBackgroundColor = function(data){
+        return '#'+Sha1.hash(data).slice(0,6);
     },
 
     show = function(){

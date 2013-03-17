@@ -87,7 +87,7 @@
                     }
                     if(item.image)
                         el.css({backgroundImage: "url("+item.image+")"});
-                    el.css({backgroundColor: KIJ2013.Util.randomColor(128)});
+                    el.css({backgroundColor: generateBackgroundColor(item.key)});
                     li.append(el);
                     list.append(li);
                 });
@@ -99,6 +99,10 @@
                 }
             }
         });
+    },
+
+    generateBackgroundColor = function(data){
+        return '#'+Sha1.hash(data).slice(0,6);
     },
 
     displayNewsItem = function(guid){

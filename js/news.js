@@ -155,7 +155,11 @@
     },
 
     onContentReady = function(callback){
-        events.bind('contentready', callback);
+        console.log("News.onContentReady()");
+        if(contentready)
+            callback();
+        else
+            events.bind('contentready', callback);
     };
 
     KIJ2013.Modules.News = {

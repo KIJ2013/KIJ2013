@@ -110,10 +110,6 @@
             el.append(sp);
             el.data('guid', item.key);
             el.click(onClickNewsItem);
-            if(index == 0){
-                li.css({width: "100%"})
-                el.css({height: "140px"});
-            }
             if(item.image)
                 el.css({backgroundImage: "url("+item.image+")"});
             el.css({backgroundColor: generateBackgroundColor(item.key)});

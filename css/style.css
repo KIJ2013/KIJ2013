@@ -191,6 +191,12 @@ ul.listview li a
     vertical-align: bottom;
     overflow: hidden;
 }
+#news-list li:first-child {
+    width: 100%;
+}
+#news-list li:first-child a {
+    height: 140px;
+}
 #news-list a {
     background-position: 50%;
     background-repeat: no-repeat;

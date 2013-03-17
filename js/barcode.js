@@ -18,7 +18,9 @@
         // Normalise window URL
         win.URL ||
             (win.URL = win.webkitURL || win.msURL || win.oURL);
-        if(!nav.getUserMedia)
+        if(nav.getUserMedia)
+            KIJ2013.addMenuItem('Barcode');
+        else
             KIJ2013.showError('Barcode Scanner is not available on your '
                 + 'platform.')
     },

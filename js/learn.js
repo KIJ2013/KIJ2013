@@ -89,6 +89,7 @@
 
     init = function(){
         settings = KIJ2013.getModuleSettings('Learn');
+        KIJ2013.addMenuItem('Learn');
         createDatabase();
     },
 

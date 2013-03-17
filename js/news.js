@@ -12,6 +12,8 @@
 
     init = function(){
         settings = KIJ2013.getModuleSettings('News');
+        KIJ2013.addMenuItem('News');
+
         events.bind('itemsready', function(){
             console.log('itemsready');
             if(view == "item")
@@ -151,7 +153,6 @@
     },
 
     onContentReady = function(callback){
-        console.log("News.onContentReady()");
         if(contentready)
             callback();
         else

@@ -8,56 +8,89 @@ var KIJ2013 = (function(window, $, Lawnchair){
         popup,
         store,
         modules = {},
+        events = $({}),
 
         /**
          * Initialise KIJ2013 objects, databases and preferences
          */
         init = function(){
-            var firstModule,
-                afterDB = function(){
-                    var select = $('#action_bar select'), m;
-                    select.empty();
-                    for(module in modules){
-                        if(!firstModule)
-                            firstModule = module;
-                        $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
-                        m = modules[module];
-                        (typeof m.init == "function") && m.init();
-                    }
-                    select.change(function(){
-                        navigateTo(select.val());
-                    });
-                };
 
-            // Load preferences from store
+            popup = $('#popup');
+            loading = $('#loading');
+
+            var firstModule;
+
+            events.bind('contentready', function(){
+                console.log('contentready');
+                setActionBarUp();
+                $('#action_bar').show();
+                navigateTo(firstModule);
+                setTimeout(function() {window.scrollTo(0, 1);}, 0);
+            });
+
+            events.bind('databaseready', function(){
+                console.log('databaseready');
+                var select = $('#action_bar select'),
+                    m, trigger = false;
+                select.empty();
+                for(module in modules){
+                    m = modules[module];
+                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
+                    (typeof m.init == "function") && m.init();
+                    if(!firstModule){
+                        firstModule = module;
+                        if(m.contentready){
+                            m.contentready(function(){events.trigger('contentready')});
+                        }
+                        else {
+                            trigger = true;
+                        }
+                        (typeof m.show == "function") && m.show();
+                    }
+                }
+                select.change(function(){
+                    navigateTo(select.val());
+                });
+                if(trigger) {
+                    events.trigger('contentready');
+                }
+            });
+
             store = Lawnchair({name: store_name}, function(){
-                var both = false;
+                var prefReady = false,
+                    settReady = false,
+                    databaseReady = false;
+
+                // Load preferences from store
                 this.get(preferences_key, function(pref){
                     if(pref)
                         preferences = pref;
 
-                    both && afterDB();
-                    both = true;
+                    if(settReady && !databaseReady){
+                        events.trigger('databaseready');
+                        databaseReady = true;
+                    }
+                    prefReady = true;
                 });
+
+                events.bind('settingsload', function(){
+                    console.log('settingsload');
+                    if(prefReady && !databaseReady){
+                        events.trigger('databaseready');
+                        databaseReady = true;
+                    }
+                    settReady = true;
+                });
+
+                // Load settings from store
                 this.get(settings_key, function(sett){
-                    if(sett)
+                    if(sett){
                         settings = sett;
-
+                        events.trigger('settingsload');
+                    }
                     loadSettings();
-
-                    both && afterDB();
-                    both = true;
                 });
             });
-
-            setActionBarUp();
-            popup = $('#popup');
-            loading = $('#loading');
-            setTimeout(function() {window.scrollTo(0, 1);}, 0);
-            setTimeout(function(){
-                $('#action_bar').show();
-                navigateTo(firstModule);
-            },1000);
         },
 
         /**
@@ -70,7 +103,11 @@ var KIJ2013 = (function(window, $, Lawnchair){
             KIJ2013.Util.loadFirst(urls, function(json){
                 json.key = settings_key;
                 settings = json;
-                store.save(settings);
+                if(store)
+                    store.save(settings);
+                else
+                    console.log("Error: Store not available to save settings");
+                events.trigger('settingsload');
             });
         },
 
@@ -164,7 +201,6 @@ var KIJ2013 = (function(window, $, Lawnchair){
         {
             var blank = typeof title == "undefined" || title == "",
                 default_title = "KIJ2013";
-            $('title').text(blank ? default_title : default_title + " - " + title);
             $('#action_bar h1').text(blank ? default_title : title);
         },
 

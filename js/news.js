@@ -45,8 +45,10 @@
                 store.batch(items, function(){
                     if(view == "list")
                         displayNewsList();
-                    events.trigger('contentready');
-                    contentready = true;
+                    if(!contentready) {
+                        events.trigger('contentready');
+                        contentready = true;
+                    }
                 });
                 fetching = false;
             },"xml").error(function(jqXHR,status,error){

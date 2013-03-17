@@ -7,6 +7,7 @@
         settings = {},
 
         init = function(){
+            KIJ2013.addMenuItem('Map');
             var s = settings = KIJ2013.getModuleSettings('Map');
             xScale = s.imageSize[0]/(s.imageBounds[2]-s.imageBounds[0]);
             yScale = s.imageSize[1]/(s.imageBounds[3]-s.imageBounds[1]);

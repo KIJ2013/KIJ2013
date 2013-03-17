@@ -5,6 +5,7 @@
 
     init = function(){
         settings = KIJ2013.getModuleSettings('Radio');
+        KIJ2013.addMenuItem('Radio');
         player = $('#player').jPlayer({
             cssSelectorAncestor: "#controls",
             nativeSupport: true,

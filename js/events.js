@@ -162,6 +162,7 @@
 
     init = function() {
         settings = KIJ2013.getModuleSettings('Events');
+        KIJ2013.addMenuItem('Events');
         createDatabase();
         fetchItems();
     },

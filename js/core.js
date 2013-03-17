@@ -5,6 +5,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
         default_settings_url = "settings.json",
         loading,
         beingLoaded,
+        menu,
         popup,
         store,
         modules = {},
@@ -15,10 +16,15 @@ var KIJ2013 = (function(window, $, Lawnchair){
          */
         init = function(){
 
+            menu = $('#action_bar select');
             popup = $('#popup');
             loading = $('#loading');
 
             var firstModule;
+
+            menu.change(function(){
+                navigateTo(menu.val());
+            });
 
             events.bind('contentready', function(){
                 console.log('contentready');
@@ -30,12 +36,9 @@ var KIJ2013 = (function(window, $, Lawnchair){
 
             events.bind('databaseready', function(){
                 console.log('databaseready');
-                var select = $('#action_bar select'),
-                    m, trigger = false;
-                select.empty();
+                var m, trigger = false;
                 for(module in modules){
                     m = modules[module];
-                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
                     (typeof m.init == "function") && m.init();
                     if(!firstModule){
                         firstModule = module;
@@ -48,9 +51,6 @@ var KIJ2013 = (function(window, $, Lawnchair){
                         (typeof m.show == "function") && m.show();
                     }
                 }
-                select.change(function(){
-                    navigateTo(select.val());
-                });
                 if(trigger) {
                     events.trigger('contentready');
                 }
@@ -204,6 +204,12 @@ var KIJ2013 = (function(window, $, Lawnchair){
             $('#action_bar h1').text(blank ? default_title : title);
         },
 
+        addMenuItem = function(name,module){
+            if(typeof module == "undefined")
+                module = name;
+            $("<option>").text(name).val(module).appendTo(menu);
+        },
+
         showLoading = function()
         {
             if(loading.length == 0)
@@ -246,6 +252,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
      * Export public API functions
      */
     return {
+        addMenuItem: addMenuItem,
         clearCaches: clearCaches,
         clearPreferences: clearPreferences,
         getModuleSettings: getModuleSettings,

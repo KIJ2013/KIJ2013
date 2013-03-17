@@ -6,9 +6,10 @@ html, body
 }
 body
 {
-    background-color: #ffcc33;
+    background-color: #E8E8E8;
     background-repeat: no-repeat;
     background-position: 100% 100%;
+    color: #333;
     font-family: sans-serif;
 }
 section {
@@ -54,7 +55,7 @@ ul.listview li a
     white-space: nowrap;
 }
 #body {
-    padding-top: 48px;
+    margin-top: 48px;
 }
 #header_image {
     background-image: url(http://www.kij13.org.uk/wp-content/uploads/2011/02/kij2009opening.jpg);
@@ -64,11 +65,11 @@ ul.listview li a
     text-align: center;
 }
 #action_bar {
-    background-color: #DDD;
-    border-bottom: 1px solid #A9A9A9;
+    background-color: #FC3;
+    border-bottom: 3px solid #F2C130;
     box-shadow: 0 0 10px 3px black;
     display: none;
-    height: 48px;
+    height: 46px;
     left: 0;
     overflow: hidden;
     position: fixed;
@@ -86,13 +87,15 @@ ul.listview li a
     height: 32px;
     line-height: 20px;
     margin-left: 4px;
-    min-width: 64px;
     text-decoration: none;
 }
 #action_bar img {
     display: inline-block;
     vertical-align: middle;
     width: 32px;
+}
+#up-icon {
+    margin: 0 -5px;
 }
 #action_bar h1 {
     color: #333;
@@ -103,19 +106,22 @@ ul.listview li a
 }
 #action_bar select {
     -webkit-appearance: none;
-    background-color: #DDD;
-    background-image: url(../img/select_arrow.png);
+    background-color: transparent;
+    background-image: url(../img/select-arrow.png);
     background-position: bottom right;
     background-repeat: no-repeat;
     border: 0;
     border-radius: 0;
-    color: #333;
+    color: black;
     font-family: sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     height: 24px;
     margin: 14px 4px;
     padding-right: 10px;
+}
+#action_bar select:focus {
+  outline: none;
 }
 #action_bar option {
     background-color: white;
@@ -147,8 +153,10 @@ ul.listview li a
     border-top-right-radius: 10px;
 }
 #splash {
+    background-color: #FC3;
     display: block;
-    line-height: 384px;
+    height: 100%;
+    line-height: 400px;
     text-align: center;
 }
 #splash img {
@@ -182,6 +190,12 @@ ul.listview li a
     padding: 0;
     vertical-align: bottom;
     overflow: hidden;
+}
+#news-list li:first-child {
+    width: 100%;
+}
+#news-list li:first-child a {
+    height: 140px;
 }
 #news-list a {
     background-position: 50%;

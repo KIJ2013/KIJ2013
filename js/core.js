@@ -35,6 +35,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
                 select.empty();
                 for(module in modules){
                     m = modules[module];
+                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
+                    (typeof m.init == "function") && m.init();
                     if(!firstModule){
                         firstModule = module;
                         if(m.contentready){
@@ -43,9 +45,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
                         else {
                             trigger = true;
                         }
+                        (typeof m.show == "function") && m.show();
                     }
-                    $("<option>").text(KIJ2013.Util.ucfirst(module)).appendTo(select);
-                    (typeof m.init == "function") && m.init();
                 }
                 select.change(function(){
                     navigateTo(select.val());

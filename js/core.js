@@ -16,7 +16,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
          */
         init = function(){
 
-            menu = $('#action_bar select');
+            menu = $('#spinner');
             popup = $('#popup');
             loading = $('#loading');
 

@@ -4,6 +4,8 @@
         fetching = false,
         contentready = false,
         view = null,
+        listView,
+        itemView,
         settings = {},
         events = $({}),
         // Internal cache of loaded items
@@ -14,12 +16,19 @@
         settings = KIJ2013.getModuleSettings('News');
         KIJ2013.addMenuItem('News');
 
+        listView = $('#news-list');
+        itemView = $('#news div');
+
         events.bind('itemsready', function(){
             console.log('itemsready');
-            if(view == "item")
-                displayNewsItem(currentItem);
-            else
-                displayNewsList();
+
+            // Load first/current news item
+            displayNewsItem(currentItem);
+
+            // Populate list
+            displayNewsList();
+
+            // If contentready hasn't been fired yet, do it now
             if(!contentready) {
                 events.trigger('contentready');
                 contentready = true;
@@ -62,6 +71,8 @@
                         item.image = $(imgs[0]).attr('src');
                     new_items.push(item);
                     items[item.key] = item;
+                    if(!currentItem)
+                        currentItem = item.key;
                 });
                 events.trigger('itemsready');
                 store.batch(new_items);
@@ -84,6 +95,8 @@
                 items = {};
                 $.each(dbitems, function(index, item){
                     items[item.key] = item;
+                    if(!currentItem)
+                        currentItem = item.key;
                 });
                 events.trigger('itemsready');
             }
@@ -103,22 +116,25 @@
         KIJ2013.setActionBarUp();
         KIJ2013.setTitle('News');
         KIJ2013.scrollTop();
-        var list = $('<ul/>').attr('id',"news-list").addClass("listview");
+        listView.empty();
         $.each(items,function(index,item){
-            var li, el, sp;
+            var li, el, im, sp;
             li = $('<li/>');
             el = $('<a/>').attr('id', item.key);
+            im = $('<div>');
             sp = $('<span/>').text(item.title);
+            el.append(im);
             el.append(sp);
             el.data('guid', item.key);
             el.click(onClickNewsItem);
             if(item.image)
-                el.css({backgroundImage: "url("+item.image+")"});
-            el.css({backgroundColor: generateBackgroundColor(item.key)});
+                im.css({backgroundImage: "url("+item.image+")"});
+            im.css({backgroundColor: generateBackgroundColor(item.key)});
             li.append(el);
-            list.append(li);
+            listView.append(li);
         });
-        $('#news').empty().append(list);
+        itemView.addClass('hidden-phone');
+        listView.removeClass('hidden-phone');
         KIJ2013.hideLoading();
     },
 
@@ -127,12 +143,13 @@
         KIJ2013.setActionBarUp(function(){
             displayNewsList();
         });
-        var item = items[guid],
-            content = $('<div/>').css({"padding": "10px"});
+        var item = items[guid];
         KIJ2013.setTitle(item.title);
-        $('<h1/>').text(item.title).appendTo(content);
-        content.append(item.description);
-        $('#news').empty().append(content);
+        itemView.empty();
+        $('<h1/>').text(item.title).appendTo(itemView);
+        itemView.append(item.description);
+        listView.addClass('hidden-phone');
+        itemView.removeClass('hidden-phone');
         KIJ2013.scrollTop();
     },
 

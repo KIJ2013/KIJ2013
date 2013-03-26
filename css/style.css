@@ -65,6 +65,29 @@ ul.listview li a
     height: 72px;
     text-align: center;
 }
+#loading {
+    display: none;
+    font-size: 2em;
+    padding: 20px;
+    text-align: center;
+}
+#popup {
+    display: none;
+    background: #EEE;
+    border: solid #CCC;
+    border-width: 1px 1px 0 1px;
+    position: fixed;
+    bottom: 0px;
+    margin: 0 15%;
+    padding: 5px;
+    width: 70%;
+    text-align: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+/**
+ Action Bar
+ */
 #action_bar {
     background-color: #FC3;
     border-bottom: 3px solid #F2C130;
@@ -167,26 +190,9 @@ ul.listview li a
 #action_bar option:last-child {
     border: 0;
 }
-#loading {
-    display: none;
-    font-size: 2em;
-    padding: 20px;
-    text-align: center;
-}
-#popup {
-    display: none;
-    background: #EEE;
-    border: solid #CCC;
-    border-width: 1px 1px 0 1px;
-    position: fixed;
-    bottom: 0px;
-    margin: 0 15%;
-    padding: 5px;
-    width: 70%;
-    text-align: center;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
+/**
+ * Splash Screen
+ */
 #splash {
     background-color: #FC3;
     display: block;
@@ -197,6 +203,9 @@ ul.listview li a
 #splash img {
     vertical-align: middle;
 }
+/**
+ * News Module
+ */
 #news-list {
     font-size: 1em;
     padding: 0;
@@ -241,6 +250,9 @@ ul.listview li a
 #news-item {
   padding: 10px;
 }
+/**
+ * Events Module
+ */
 #event-list a {
     position: relative;
 }
@@ -281,6 +293,9 @@ ul.listview li a
     margin: 0;
     padding: 10px;
 }
+/**
+ * Map Module
+ */
 #map {
     position: relative;
 }
@@ -291,12 +306,18 @@ ul.listview li a
     position: absolute;
     width: 24px;
 }
+/**
+ * Radio Module
+ */
 #radio {
     text-align: center;
 }
 #controls .button {
     display: inline-block;
 }
+/**
+ * Learn Module
+ */
 #learn .intro {
     padding-top: 10px;
     text-align: center;
@@ -310,6 +331,9 @@ ul.listview li a
 	50% {box-shadow: 0 0 20px 15px black;}
 	100% {box-shadow: 0 0 20px 15px transparent;}
 }
+/**
+ * Barcode Module
+ */
 #barcode {
     text-align: center;
 }
@@ -317,6 +341,9 @@ video {
     width: 90%;
     margin-top: 40px;
 }
+/**
+ * Settings Module
+ */
 #settings {
     padding: 5px;
 }

@@ -126,9 +126,10 @@ ul.listview li a
 #action_bar h1 {
     color: #333;
     display: inline-block;
-    margin: 16px 4px;
+    font-size: 18px;
+    line-height: 24px;
+    margin: 12px 0;
     vertical-align: middle;
-    font-size: 16px;
 }
 #action_bar select {
     -webkit-appearance: none;
@@ -145,7 +146,7 @@ ul.listview li a
     font-size: 18px;
     font-weight: bold;
     height: 24px;
-    margin: 10px 0;
+    margin: 12px 0;
     padding: 0 10px 0 0;
     width: auto;
 }
@@ -359,6 +360,9 @@ video {
  */
 #settings {
     padding: 5px;
+}
+#settings select {
+    width: 100px;
 }
 #settings button,
 #settings select {

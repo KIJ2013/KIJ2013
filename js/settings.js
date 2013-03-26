@@ -8,6 +8,9 @@
 
     init = function() {
         if(!initialised){
+
+            KIJ2013.addActionItem('Settings');
+
             subcamp_el = $('#subcamp');
             var subcamps = KIJ2013.getSetting('subcamps',[]),
                 subcamp = KIJ2013.getPreference('subcamp'),

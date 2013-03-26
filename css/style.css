@@ -299,6 +299,9 @@ ul.listview li a
 #map {
     position: relative;
 }
+#map img {
+    max-width: initial;
+}
 #marker {
     background-image: url(../img/scoutpointer.png);
     display: none;

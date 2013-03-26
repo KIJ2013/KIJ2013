@@ -5,7 +5,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
         default_settings_url = "settings.json",
         loading,
         beingLoaded,
-        menu,
+        spinner,
         popup,
         store,
         modules = {},
@@ -16,14 +16,14 @@ var KIJ2013 = (function(window, $, Lawnchair){
          */
         init = function(){
 
-            menu = $('#spinner');
+            spinner = $('#spinner');
             popup = $('#popup');
             loading = $('#loading');
 
             var firstModule;
 
-            menu.change(function(){
-                navigateTo(menu.val());
+            spinner.change(function(){
+                navigateTo(spinner.val());
             });
 
             events.bind('contentready', function(){
@@ -36,6 +36,8 @@ var KIJ2013 = (function(window, $, Lawnchair){
 
             events.bind('databaseready', function(){
                 console.log('databaseready');
+
+                // Load Modules
                 var m, trigger = false;
                 for(module in modules){
                     m = modules[module];
@@ -51,6 +53,9 @@ var KIJ2013 = (function(window, $, Lawnchair){
                         (typeof m.show == "function") && m.show();
                     }
                 }
+
+                // If first module does not support contentready event
+                // we need to fire it now
                 if(trigger) {
                     events.trigger('contentready');
                 }
@@ -204,10 +209,10 @@ var KIJ2013 = (function(window, $, Lawnchair){
             $('#action_bar h1').text(blank ? default_title : title);
         },
 
-        addMenuItem = function(name,module){
+        addSpinnerItem = function(name,module){
             if(typeof module == "undefined")
                 module = name;
-            $("<option>").text(name).val(module).appendTo(menu);
+            $("<option>").text(name).val(module).appendTo(spinner);
         },
 
         showLoading = function()
@@ -252,7 +257,7 @@ var KIJ2013 = (function(window, $, Lawnchair){
      * Export public API functions
      */
     return {
-        addMenuItem: addMenuItem,
+        addMenuItem: addSpinnerItem,
         clearCaches: clearCaches,
         clearPreferences: clearPreferences,
         getModuleSettings: getModuleSettings,

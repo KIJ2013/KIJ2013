@@ -62,6 +62,9 @@ var KIJ2013 = (function(window, $, Lawnchair){
                     }
                 }
 
+                // Add our own About action
+                addActionItem('About');
+
                 // If first module does not support contentready event
                 // we need to fire it now
                 if(trigger) {

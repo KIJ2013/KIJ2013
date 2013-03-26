@@ -368,6 +368,13 @@ video {
 #settings select {
     float: right;
 }
+/**
+ * About page
+ */
+#about {
+    background-color: #ffcc33;
+    text-align: center;
+}
 
 /* Portrait phones */
 @media (min-width: 320px) and (max-width: 479px) {

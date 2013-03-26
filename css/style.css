@@ -262,11 +262,16 @@ ul.listview li a
 #event-list .title {
     font-size: 20pt;
     font-weight: bold;
+    line-height: 26pt;
+    margin-left: 55px;
+    margin-right: 80px;
+    min-height: 55px;
     white-space: normal;
     width: 70%;
 }
 #event-list .date-text {
     float: left;
+    margin: 5px 0;
     text-align: center;
     width: 50px;
     white-space: normal;
@@ -278,16 +283,16 @@ ul.listview li a
 #event-list .remind-btn{
     position: absolute;
     right: 0;
-    top: 10px;
+    top: 0;
 }
 .category {
     font-size: 10pt;
     font-weight: bold;
 }
 #event-list .category {
-    bottom: 5px;
     position: absolute;
     right: 5px;
+    top: 30px;
 }
 #debug p {
     margin: 0;
